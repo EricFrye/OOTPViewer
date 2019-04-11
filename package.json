@@ -1,0 +1,24 @@
+{
+  "name": "ootpviewer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EricFrye/OOTPViewer.git"
+  },
+  "author": "Eric Frye",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EricFrye/OOTPViewer/issues"
+  },
+  "homepage": "https://github.com/EricFrye/OOTPViewer#readme",
+  "devDependencies": {
+    "electron": "^4.1.4"
+  },
+  "dependencies": {}
+}
