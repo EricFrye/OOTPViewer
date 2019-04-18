@@ -10,8 +10,10 @@ public class driver {
 		//JFrame view = new JFrame ("Player View");
 		//view.setVisible(true);
 		
-		String playersPath = "data/players.csv";
-		Holder players = new Holder (playersPath);
+		String path = "data";
+		
+		String playersPath = "players";
+		Holder players = new Holder (path, playersPath);
 		
 		try {
 			players.loadInfo();
@@ -19,8 +21,8 @@ public class driver {
 			e.printStackTrace();
 		}
 		
-		String playersBattingPath = "data/players_career_batting_stats.csv";
-		Holder playersBatting = new Holder (playersBattingPath);
+		String playersBattingPath = "players_career_batting_stats";
+		Holder playersBatting = new Holder (path ,playersBattingPath);
 		
 		try {
 			playersBatting.loadInfo();

@@ -1,5 +1,6 @@
 package Data;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import query.LogicalStatement;
 import query.Query;
@@ -15,44 +16,59 @@ import java.io.*;
 public class Holder {
 	
 	private List <String> mappings; //maps the col names to their index. the index in the list is the index in the report
-	private List <Entity> info; //holds the actual data
-	private Scanner fd; //input for file
+	private List <Entity> data; //holds the actual data
+	private String directoryPath;
+	private String fileName;
 	
 	/***
 	 * Creates the InfoHolder object
 	 * @param filePath the path to the target data file
 	 */
-	public Holder (String filePath) {
+	public Holder (String directoryPath, String fileName) {
 		
-		mappings = new ArrayList <String> ();
-		info = new ArrayList <Entity> ();
-		
-		try {
-			fd = new Scanner (new File (filePath));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		this.mappings = new ArrayList <String> ();
+		this.data = new ArrayList <Entity> ();
+		this.directoryPath = directoryPath;
+		this.fileName = fileName;
 		
 	}
 	
-	/***
+	/**
 	 * Standard loading function.  All columns are kept
 	 */
 	public void loadInfo () throws Exception {
 		
-		String [] headers = fd.nextLine().split(",");
+		List <File> files = findAllFiles();
+		Thread [] workers = new Thread [files.size()];
 		
-		for (String curHeader: headers) {
-			mappings.add(curHeader);
+		for (int i = 0; i < files.size(); i++) {
+			
+			File curFile = files.get(i);
+			Scanner curInput = new Scanner (curFile);
+			
+			//the first file has header info, we need this before anything can start
+			if (i == 0) {
+				
+				String header = curInput.nextLine();
+				String [] headers = header.split(",");
+
+				for (String curHeader: headers) {
+					this.mappings.add(curHeader);
+				}
+				
+			}
+			
+			FileLoader curWorker = new FileLoader (curFile, curInput, this.data, this.mappings);
+			workers[i] = new Thread (curWorker);
+			
 		}
 		
-		while (fd.hasNextLine()) {
-			
-			String line = fd.nextLine();
-			
-			Entity toAdd = new Entity (line, mappings);
-			info.add(toAdd);
-					
+		for (Thread curWorker: workers) {
+			curWorker.start();
+		}
+
+		for (Thread curWorker: workers) {
+			curWorker.join();
 		}
 
 	}
@@ -67,7 +83,7 @@ public class Holder {
 		List <Query> queries = LogicalStatement.parse(query);
 		List <Entity> ret = new LinkedList <Entity> ();
 		
-		for (Entity curEnt: info) {
+		for (Entity curEnt: data) {
 			
 			boolean success;
 			
@@ -88,11 +104,12 @@ public class Holder {
 		
 	}
 	
+	//TODO
 	public String buildReport () {
 		
 		String ret = "";
 		
-		for (Entity curEnt: info) {
+		for (Entity curEnt: data) {
 			
 			
 		}
@@ -106,6 +123,45 @@ public class Holder {
 	 */
 	public int numEntities () {
 		return mappings.size();
+	}
+	
+	/**
+	 * @param directoryPath String representation of the path to the directory the target files are currently in.  No trailing /
+	 * @param mainFileName Name of file to search for splits of.  The splits will be of the form mainFileName_\d+
+	 * @return An List of all the files matching the parameters
+	 */
+	public List <File> findAllFiles () {
+		
+		File searchDir = new File (this.directoryPath);
+		File [] allFilesInDir = searchDir.listFiles();
+		
+		String pattern = String.format("^%s(_\\d+){0,1}.csv$", this.fileName);
+		List <File> matchedFiles = new LinkedList <File> ();
+		
+		for (File curFile: allFilesInDir) {
+			
+			if (curFile.getName().matches(pattern)) {
+				matchedFiles.add(curFile);
+			}
+			
+		}
+		
+		return matchedFiles;
+		
+	}
+	
+	public static void main (String [] args) {
+		
+		String dir = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
+		String file = "players_game_batting";
+		
+		Holder players = new Holder (dir, file);
+		try {
+			players.loadInfo();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+				
 	}
 	
 }
