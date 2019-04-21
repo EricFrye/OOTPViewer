@@ -2,40 +2,35 @@ package query;
 
 import java.util.*;
 import Data.Entity;
+import Data.Holder;
 
 /**
  * QueryResult contains the results of a query and any data related to this said data
  * @author Eric
  *
  */
-public class QueryResult {
+public class QueryResult extends Holder{
 	
-	private List <Entity> result;
 	private List <Query> query;
-	
+
 	/**
 	 * 
 	 * @param result The result from Holder.query
 	 * @param query The list of queries as parsed by LogicalStatement.parse
 	 */
-	public QueryResult (List <Entity> result, List <Query> query) {
+	public QueryResult (List <Entity> result, List <Query> query, List <String> mappings) {
 		
-		this.result = new ArrayList <Entity> ();
-		
-		for (Entity toCopy: result) {
-			this.result.add(new Entity(toCopy));
-		}
-		
+		super(mappings, result);
 		this.query = query;
 		
 	}
 	
 	/**
 	 * Gets the first result found for this query
-	 * @return null if nothing found, otherwise the first Entity
+	 * @return null if nothing found, otherwise the first Entity.  This is a copy of the Entity, not a reference
 	 */
 	public Entity getTop () {
-		return result.size() == 0 ? null : result.get(0);
+		return new Entity(super.getTop());
 	}
 	
 	/**
@@ -45,8 +40,9 @@ public class QueryResult {
 	 */
 	public String getTopField (String field) {
 		
-		Entity top = getTop();
+		Entity top = super.getTop();
 		return top == null ? "NaN (No Result)" : top.getData(field);
 		
-	}
+	}	
+	
 }

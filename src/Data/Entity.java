@@ -93,6 +93,18 @@ public class Entity {
 		return "Entity [data=" + data + "]";
 	}
 	
+	public String asCSV (List <String> mappings) {
+		
+		String ret = "";
+		
+		for (String curField: mappings) {
+			ret += data.get(curField) + ",";
+		}
+		
+		return ret.substring(0, ret.length()-1) + "\n";
+		
+	}
+	
 	/**
 	 * @param field The name of the field
 	 * @return True if the field exists in this entity, falss otherwise

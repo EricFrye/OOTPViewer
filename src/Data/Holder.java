@@ -34,6 +34,20 @@ public class Holder {
 	}
 	
 	/**
+	 * Call from child
+	 * @param directoryPath path to directory fileName is in
+	 * @param fileName name of file 
+	 * @param mappings
+	 * @param data
+	 */
+	public Holder (List <String> mappings, List <Entity> data) {
+		this.directoryPath = "";
+		this.fileName = "";
+		this.mappings = mappings;
+		this.data = data;
+	}
+	
+	/**
 	 * Standard loading function.  All columns are kept
 	 */
 	public void loadInfo () throws Exception {
@@ -100,7 +114,7 @@ public class Holder {
 			
 		}
 		
-		return new QueryResult(ret, queries);
+		return new QueryResult(ret, queries, this.mappings);
 		
 	}
 	
@@ -150,6 +164,25 @@ public class Holder {
 		
 	}
 	
+	
+	public String asCSV () {
+		
+		String ret = "";
+		
+		for (String curMapping: mappings) {
+			ret += curMapping + ",";
+		}
+		
+		ret = ret.substring(0, ret.length()-1) + "\n";
+		
+		for (Entity curEnt: data) {
+			ret += curEnt.asCSV(mappings);
+		}
+		
+		return ret;
+		
+	}
+	
 	public static void main (String [] args) {
 		
 		String dir = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
@@ -162,6 +195,14 @@ public class Holder {
 			e.printStackTrace();
 		}
 				
+	}
+	
+	protected List <Entity> getData () {
+		return data;
+	}
+	
+	protected Entity getTop () {
+		return data.size() == 0 ? null : data.get(0);
 	}
 	
 }
