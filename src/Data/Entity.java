@@ -4,7 +4,7 @@ import java.util.*;
 import query.Query;
 
 /***
- * A single line from a data file 
+ * A single line from a data file.  An Entity cannot be interpreted outside of the Holder that it belongs to as it does not have the data mappings 
  * @author Eric
  *
  */
@@ -12,23 +12,20 @@ public class Entity {
 
 	//the key is the string representation of the field name
 	//the value is the string representation of the value for a field for this entity
-	private Map <String, String> data;
+	private String [] data;
 	
 	/***
 	 * Create the entity object
 	 * @param in A single line from a datafile
 	 * @param mappings The mappings created during the Holder constructer
 	 */
-	public Entity (String in, List <String> mappings) {
+	public Entity (String in) {
 		
-		this.data = new HashMap <String, String> ();
+		this.data = in.split(",");
 		
-		String [] vals = in.split(",");
-		
-		for (int index = 0; index < mappings.size(); index++) {
-			String curStat = mappings.get(index);
-			String toInsert = vals[index].replaceAll("\"","");
-			data.put(curStat, toInsert);
+		//clean data of ""
+		for (int index = 0; index < data.length; index++) {
+			data[index] = data[index].replaceAll("\"", "");
 		}
 		
 	}
@@ -38,21 +35,15 @@ public class Entity {
 	 * @param copy Reference to copy
 	 */
 	public Entity (Entity copy) {
-		
-		this.data = new HashMap <String, String> ();
-		
-		for (String curKey: copy.getFields()) {
-			this.data.put(curKey, copy.getData(curKey));
-		}
-		
+		this.data = copy.getData();
 	}
 	
 	/***
 	 * @param key Field name
 	 * @return Value corresponding to field name for this entity
 	 */
-	public String getData (String key) {
-		return data.containsKey(key) ? data.get(key) : "NaN (No Field)";
+	public String getData (int index) {
+		return index < data.length ? data[index] : "NaN (No Field)";
 	}
 	
 	/**
@@ -61,20 +52,20 @@ public class Entity {
 	 * @return True if this entity should be in the query, false if not
 	 * @throws Exception If a field is queried that is not included in this entity
 	 */
-	public boolean query (List <Query> queries) throws Exception {
+	public boolean query (Map <String, Integer> mappings, List <Query> queries) throws Exception {
 		
 		for (Query curQuery: queries) {
 
 			String field = curQuery.getField();
 			
 			//the field included in the query is invalid
-			if (!data.containsKey(field)) {
+			if (!mappings.containsKey(field)) {
 				throw new Exception ("The field " + field + " does not exist in this record");
 			}
 			
 			else {
 				
-				String thisVal = data.get(field);
+				String thisVal = data[mappings.get(field)];
 				
 				if (!curQuery.comp(thisVal)) {
 					return false;
@@ -93,32 +84,20 @@ public class Entity {
 		return "Entity [data=" + data + "]";
 	}
 	
-	public String asCSV (List <String> mappings) {
-		
-		String ret = "";
-		
-		for (String curField: mappings) {
-			ret += data.get(curField) + ",";
-		}
-		
-		return ret.substring(0, ret.length()-1) + "\n";
-		
-	}
-	
 	/**
-	 * @param field The name of the field
-	 * @return True if the field exists in this entity, falss otherwise
+	 * 
+	 * @return The data in this Entity as a CSV line
 	 */
-	public boolean containsField (String field) {
-		return data.containsKey(field);
-	}
-	
-	/**
-	 * @return A set of the keys contained in this Entity
-	 */
-	public Set <String> getFields () {
-		return data.keySet();
+	public String asCSV () {
+		return String.join(",", data) + "\n";
 	}
 
+	/**
+	 * 
+	 * @return A copy of this Entity's data
+	 */
+	protected String [] getData () {
+		return data.clone();
+	}
 	
 }

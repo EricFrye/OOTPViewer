@@ -18,7 +18,7 @@ public class QueryResult extends Holder{
 	 * @param result The result from Holder.query
 	 * @param query The list of queries as parsed by LogicalStatement.parse
 	 */
-	public QueryResult (List <Entity> result, List <Query> query, List <String> mappings) {
+	public QueryResult (List <Entity> result, List <Query> query, Map <String, Integer> mappings) {
 		
 		super(mappings, result);
 		this.query = query;
@@ -41,7 +41,7 @@ public class QueryResult extends Holder{
 	public String getTopField (String field) {
 		
 		Entity top = super.getTop();
-		return top == null ? "NaN (No Result)" : top.getData(field);
+		return top == null ? "NaN (No Result)" : top.getData(this.mappings.get(field));
 		
 	}	
 	

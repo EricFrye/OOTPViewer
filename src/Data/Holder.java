@@ -15,8 +15,8 @@ import java.io.*;
  */
 public class Holder {
 	
-	private List <String> mappings; //maps the col names to their index. the index in the list is the index in the report
-	private List <Entity> data; //holds the actual data
+	protected Map <String, Integer> mappings; //maps the col names to their index. the index in the list is the index in the report
+	protected List <Entity> data; //holds the actual data
 	private String directoryPath;
 	private String fileName;
 	
@@ -26,7 +26,7 @@ public class Holder {
 	 */
 	public Holder (String directoryPath, String fileName) {
 		
-		this.mappings = new ArrayList <String> ();
+		this.mappings = new HashMap <String, Integer> ();
 		this.data = new ArrayList <Entity> ();
 		this.directoryPath = directoryPath;
 		this.fileName = fileName;
@@ -40,7 +40,7 @@ public class Holder {
 	 * @param mappings
 	 * @param data
 	 */
-	public Holder (List <String> mappings, List <Entity> data) {
+	public Holder (Map <String, Integer> mappings, List <Entity> data) {
 		this.directoryPath = "";
 		this.fileName = "";
 		this.mappings = mappings;
@@ -55,6 +55,8 @@ public class Holder {
 		List <File> files = findAllFiles();
 		Thread [] workers = new Thread [files.size()];
 		
+		long startTime = System.currentTimeMillis();
+		
 		for (int i = 0; i < files.size(); i++) {
 			
 			File curFile = files.get(i);
@@ -66,8 +68,9 @@ public class Holder {
 				String header = curInput.nextLine();
 				String [] headers = header.split(",");
 
-				for (String curHeader: headers) {
-					this.mappings.add(curHeader);
+				//fill out the mappings structure
+				for (int j = 0; j < headers.length; j++) {
+					this.mappings.put(headers[j], j);
 				}
 				
 			}
@@ -84,6 +87,8 @@ public class Holder {
 		for (Thread curWorker: workers) {
 			curWorker.join();
 		}
+		
+		System.out.println(String.format("Run time for loading %s was %f seconds.", this.fileName, (System.currentTimeMillis()-startTime)/1000.0));
 
 	}
 	
@@ -102,7 +107,7 @@ public class Holder {
 			boolean success;
 			
 			try {
-				success = curEnt.query(queries);
+				success = curEnt.query(mappings, queries);
 			}
 			catch (Exception e) {
 				success = false;
@@ -169,14 +174,10 @@ public class Holder {
 		
 		String ret = "";
 		
-		for (String curMapping: mappings) {
-			ret += curMapping + ",";
-		}
-		
-		ret = ret.substring(0, ret.length()-1) + "\n";
+		ret += String.join(",", this.mappings()) + "\n";
 		
 		for (Entity curEnt: data) {
-			ret += curEnt.asCSV(mappings);
+			ret += curEnt.asCSV();
 		}
 		
 		return ret;
@@ -203,6 +204,22 @@ public class Holder {
 	
 	protected Entity getTop () {
 		return data.size() == 0 ? null : data.get(0);
+	}
+	
+	/**
+	 * 
+	 * @return The mappings in sorted order
+	 */
+	private String [] mappings () {
+		
+		String [] ret = new String [mappings.size()];
+		
+		for (String curField: mappings.keySet()) {
+			ret[mappings.get(curField)] = curField;
+		}
+		
+		return ret;
+		
 	}
 	
 }

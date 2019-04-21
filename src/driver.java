@@ -10,7 +10,7 @@ public class driver {
 		//JFrame view = new JFrame ("Player View");
 		//view.setVisible(true);
 		
-		String path = "data";
+		String path = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
 		
 		String playersPath = "players";
 		Holder players = new Holder (path, playersPath);
@@ -30,11 +30,18 @@ public class driver {
 			e.printStackTrace();
 		}
 		
-		QueryResult res = players.query("first_name=Ivan&&last_name=Zamora");
+		QueryResult res = players.query("first_name=German&&last_name=Castro");
 		String id = res.getTopField("player_id");
 		
-		String newQuery = String.format("player_id=%s%%split_id=%s", id, "1");
-		QueryResult ivanZamoraBattingStats = playersBatting.query(newQuery);
+		String newQuery = String.format("player_id=%s%%split_id=%s&&league_id=%s", id, "1", "100");
+		QueryResult playerBattingStats = playersBatting.query(newQuery);
+		
+		String newQuery1 = String.format("player_id=%s%%split_id=%s", id, "1");
+		QueryResult playerBattingStats1 = playersBatting.query(newQuery1);
+		
+		
+		System.out.println(playerBattingStats.asCSV());
+		System.out.println(playerBattingStats1.asCSV());
 		
 	}
 	
