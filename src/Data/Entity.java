@@ -96,7 +96,7 @@ public class Entity {
 	 * 
 	 * @return A copy of this Entity's data
 	 */
-	protected String [] getData () {
+	public String [] getData () {
 		return data.clone();
 	}
 	

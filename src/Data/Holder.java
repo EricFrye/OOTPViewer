@@ -141,7 +141,7 @@ public class Holder {
 	 * @return The count of entries in this Holder
 	 */
 	public int numEntities () {
-		return mappings.size();
+		return data.size();
 	}
 	
 	/**
@@ -149,7 +149,7 @@ public class Holder {
 	 * @param mainFileName Name of file to search for splits of.  The splits will be of the form mainFileName_\d+
 	 * @return An List of all the files matching the parameters
 	 */
-	public List <File> findAllFiles () {
+	private List <File> findAllFiles () {
 		
 		File searchDir = new File (this.directoryPath);
 		File [] allFilesInDir = searchDir.listFiles();
@@ -210,7 +210,7 @@ public class Holder {
 	 * 
 	 * @return The mappings in sorted order
 	 */
-	private String [] mappings () {
+	public String [] mappings () {
 		
 		String [] ret = new String [mappings.size()];
 		
@@ -220,6 +220,15 @@ public class Holder {
 		
 		return ret;
 		
+	}
+
+	/**
+	 * 
+	 * @param index The index of the Entity that is desired
+	 * @return A copy of the string array representation of the Entity's data
+	 */
+	public String [] getEntityVal (int index) {
+		return data.get(index).getData();
 	}
 	
 }
