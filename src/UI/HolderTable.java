@@ -15,15 +15,24 @@ public class HolderTable extends JTable {
 		super(data, colNames);
 	}
 	
-	public static HolderTable generateHolderTable (Holder table) {
+	/**
+	 * Creates a stats table that displays ingame statistics
+	 * @param table The holder to draw the data from
+	 * @param fieldsSummarize str Of the form BEGIN_REGEX([\w+][\\*])([,\w+][\\*])*END_REGEX where a * literal means this field should be interpreted as a double.  The fields under which to be summarized and added at the end. 
+	 * @return A HolderTable object containing the corresponding entries and a summary row at the end
+	 */
+	public static HolderTable generateHolderTable (Holder table, String fieldsSummarize) {
 		
 		String [] colNames = table.mappings();
-		int num = table.numEntities();
-		Object [][] data = new Object [num][colNames.length];
+		int numEntries = table.numEntities(); 
+		int numExtraRows = 1; //summarization row
+		Object [][] data = new Object [numEntries+numExtraRows][colNames.length];
 		
-		for (int dataIndex = 0; dataIndex < num; dataIndex++) {
+		for (int dataIndex = 0; dataIndex < numEntries; dataIndex++) {
 			data[dataIndex] = table.getEntityVal(dataIndex);
 		}
+		
+		data[numEntries] = table.summarize(fieldsSummarize);
 		
 		return new HolderTable (data, colNames);
 		

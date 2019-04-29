@@ -1,6 +1,10 @@
+import java.awt.Toolkit;
 import java.util.*;
 
+import javax.swing.*;
+
 import Data.Holder;
+import UI.HolderTable;
 import query.*;
 
 public class driver {
@@ -33,15 +37,18 @@ public class driver {
 		QueryResult res = players.query("first_name=German&&last_name=Castro");
 		String id = res.getTopField("player_id");
 		
-		String newQuery = String.format("player_id=%s%%split_id=%s&&league_id=%s", id, "1", "100");
-		QueryResult playerBattingStats = playersBatting.query(newQuery);
+		String newQuery = String.format("player_id=%s&&split_id=1&&league_id=100", id);
+		QueryResult playerBattingStats = playersBatting.query(newQuery);	
 		
-		String newQuery1 = String.format("player_id=%s%%split_id=%s", id, "1");
-		QueryResult playerBattingStats1 = playersBatting.query(newQuery1);
+		HolderTable phillySabresRecord = HolderTable.generateHolderTable(playerBattingStats,"h,d,t,hr,r,rbi,k,g,gs,sb,cs,bb,ibb,ab,war*");
+		JScrollPane s = new JScrollPane (phillySabresRecord);
 		
+		JFrame frame = new JFrame ();
+		frame.setSize((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth(), 600);
+		frame.setVisible(true);
 		
-		System.out.println(playerBattingStats.asCSV());
-		System.out.println(playerBattingStats1.asCSV());
+		s.setVisible(true);
+		frame.add(s);
 		
 	}
 	

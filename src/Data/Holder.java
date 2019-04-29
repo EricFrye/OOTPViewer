@@ -231,4 +231,44 @@ public class Holder {
 		return data.get(index).getData();
 	}
 	
+	/**
+	 * Sums the columns of this holder corresponding to the string passed in
+	 * @param str Of the form BEGIN_REGEX([\w+][\\*])([,\w+][\\*])*END_REGEX where a * literal means this field should be interpreted as a double
+	 * @return A string of a length of the amount of fields in the Holder
+	 */
+	public String [] summarize (String str) {
+		
+		String [] fields = str.split(","); 
+		String [] ret = new String [mappings.size()];
+		
+		//outerloop over the fields so we only have to access the index once
+		for (String curField: fields) {
+			
+			boolean asDouble = false;
+			
+			//check if this field has a * at the end, marking that it should be interpreted as a double 
+			if (curField.charAt(curField.length()-1) == '*') {
+				curField = curField.substring(0, curField.length()-1);
+				asDouble = true;
+			}
+			
+			int dataIndex = mappings.get(curField);
+			double total = 0; 
+			
+			
+			for (Entity curEntity: data) {
+				
+				double curVal = Double.parseDouble(curEntity.getData(dataIndex));
+				total += curVal;
+				
+			}
+			
+			ret[dataIndex] = asDouble ? String.format("%.2f", total) : String.format("%d", (int)total);
+			
+		}
+		
+		return ret;
+		
+	}
+	
 }
