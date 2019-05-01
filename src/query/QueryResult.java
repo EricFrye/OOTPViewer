@@ -3,6 +3,7 @@ package query;
 import java.util.*;
 import Data.Entity;
 import Data.Holder;
+import Data.Type;
 
 /**
  * QueryResult contains the results of a query and any data related to this said data
@@ -17,10 +18,12 @@ public class QueryResult extends Holder{
 	 * 
 	 * @param result The result from Holder.query
 	 * @param query The list of queries as parsed by LogicalStatement.parse
+	 * @param mappings The string to index mappings for the fields
+	 * @param types Array containing the types of the fields
 	 */
-	public QueryResult (List <Entity> result, List <Query> query, Map <String, Integer> mappings) {
+	public QueryResult (List <Entity> result, List <Query> query, Map <String, Integer> mappings, Type [] types) {
 		
-		super(mappings, result);
+		super(mappings, result, types);
 		this.query = query;
 		
 	}

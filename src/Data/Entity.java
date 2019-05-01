@@ -38,6 +38,30 @@ public class Entity {
 		this.data = copy.getData();
 	}
 	
+	/**
+	 * @param data Data for this Entity
+	 */
+	public Entity (String [] data) {
+		this.data = data;
+	}
+	
+	/**
+	 * Selects a subset of the fields in this entity
+	 * @param types Array of the types of the 
+	 * @return
+	 */
+	public Entity select (String [] newFields, Map <String, Integer> mappings) {
+		
+		String [] newData = new String [newFields.length];
+		
+		for (int fieldIndex = 0; fieldIndex < newFields.length; fieldIndex++) {
+			newData[fieldIndex] = this.data[mappings.get(newFields[fieldIndex])];
+		}
+		
+		return new Entity (newData);
+		
+	}
+	
 	/***
 	 * @param key Field name
 	 * @return Value corresponding to field name for this entity

@@ -6,6 +6,8 @@ import query.LogicalStatement;
 import query.Query;
 import query.QueryResult;
 
+import misc.Utilities;
+
 import java.io.*;
 
 /***
@@ -17,12 +19,14 @@ public class Holder {
 	
 	protected Map <String, Integer> mappings; //maps the col names to their index. the index in the list is the index in the report
 	protected List <Entity> data; //holds the actual data
+	protected Type [] types; //stores the type for each field
 	private String directoryPath;
 	private String fileName;
 	
 	/***
 	 * Creates the InfoHolder object
-	 * @param filePath the path to the target data file
+	 * @param directoryPath the path to the target data file
+	 * @param fileName the name of the file to load
 	 */
 	public Holder (String directoryPath, String fileName) {
 		
@@ -30,6 +34,7 @@ public class Holder {
 		this.data = new ArrayList <Entity> ();
 		this.directoryPath = directoryPath;
 		this.fileName = fileName;
+		this.types = Utilities.loadTypes("settings\\fileData", "team_record_history.csv");
 		
 	}
 	
@@ -39,11 +44,13 @@ public class Holder {
 	 * @param fileName name of file 
 	 * @param mappings
 	 * @param data
+	 * @param types types for the entities
 	 */
-	public Holder (Map <String, Integer> mappings, List <Entity> data) {
+	protected Holder (Map <String, Integer> mappings, List <Entity> data, Type [] types) {
 		this.directoryPath = "";
 		this.fileName = "";
 		this.mappings = mappings;
+		this.types = types;
 		this.data = data;
 	}
 	
@@ -119,7 +126,7 @@ public class Holder {
 			
 		}
 		
-		return new QueryResult(ret, queries, this.mappings);
+		return new QueryResult(ret, queries, this.mappings, this.types);
 		
 	}
 	
@@ -233,7 +240,7 @@ public class Holder {
 	
 	/**
 	 * Sums the columns of this holder corresponding to the string passed in
-	 * @param str Of the form BEGIN_REGEX([\w+][\\*])([,\w+][\\*])*END_REGEX where a * literal means this field should be interpreted as a double
+	 * @param str Of the form BEGIN_REGEX([\w+])([,\w+])*END_REGEX
 	 * @return A string of a length of the amount of fields in the Holder
 	 */
 	public String [] summarize (String str) {
@@ -244,18 +251,9 @@ public class Holder {
 		//outerloop over the fields so we only have to access the index once
 		for (String curField: fields) {
 			
-			boolean asDouble = false;
-			
-			//check if this field has a * at the end, marking that it should be interpreted as a double 
-			if (curField.charAt(curField.length()-1) == '*') {
-				curField = curField.substring(0, curField.length()-1);
-				asDouble = true;
-			}
-			
 			int dataIndex = mappings.get(curField);
 			double total = 0; 
-			
-			
+					
 			for (Entity curEntity: data) {
 				
 				double curVal = Double.parseDouble(curEntity.getData(dataIndex));
@@ -263,12 +261,49 @@ public class Holder {
 				
 			}
 			
-			ret[dataIndex] = asDouble ? String.format("%.2f", total) : String.format("%d", (int)total);
+			ret[dataIndex] = types[dataIndex].equals(Type.DOUBLE) ? String.format("%.2f", total) : String.format("%d", (int)total);
 			
 		}
 		
 		return ret;
 		
+	}
+	
+	/**
+	 * Selects the specified fields
+	 * @param str Of the form BEGIN_REGEX([\w+])([,\w+])*END_REGEX
+	 * @return A new Holder object that has entities with fields only specified by str
+	 */
+	public Holder select (String str) {
+		
+		String [] newFields = str.split(",");
+		Map <String, Integer> newMappings = new HashMap <String, Integer> ();
+		List <Entity> newEntities = new ArrayList <Entity> ();
+		Type [] newTypes = new Type [newFields.length];
+		
+		//select the new types
+		for (int newTypeIndex = 0; newTypeIndex < newFields.length; newTypeIndex++) {
+			newTypes[newTypeIndex] = this.types[this.mappings.get(newFields[newTypeIndex])];
+		}
+		
+		//build the new mapping map
+		for (int newMappingsIndex = 0; newMappingsIndex < newTypes.length; newMappingsIndex++) {
+			String curField = newFields[newMappingsIndex];
+			newMappings.put(curField, newMappingsIndex);
+		}
+		
+		//build the new entities list
+		for (Entity curEnt: this.data) {
+			Entity toAdd = curEnt.select(newFields, this.mappings);
+			newEntities.add(toAdd);
+		}
+		
+		return new Holder (newMappings, newEntities, newTypes);
+		
+	}
+	
+	public int recommendedTableWidth () {
+		return this.types.length * 25;
 	}
 	
 }

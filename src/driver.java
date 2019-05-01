@@ -16,6 +16,7 @@ public class driver {
 		
 		String path = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
 		
+		/*
 		String playersPath = "players";
 		Holder players = new Holder (path, playersPath);
 		
@@ -41,10 +42,24 @@ public class driver {
 		QueryResult playerBattingStats = playersBatting.query(newQuery);	
 		
 		HolderTable phillySabresRecord = HolderTable.generateHolderTable(playerBattingStats,"h,d,t,hr,r,rbi,k,g,gs,sb,cs,bb,ibb,ab,war*");
+		*/
+		
+		String fileName = "team_history_record";
+		
+		Holder records = new Holder(path, fileName);
+		try {
+			records.loadInfo();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		QueryResult recordsQuery = records.query("team_id=15");
+		
+		HolderTable phillySabresRecord = HolderTable.generateHolderTable(recordsQuery.select("year,w,l,pos,gb,pct"), "w,l");
 		JScrollPane s = new JScrollPane (phillySabresRecord);
 		
 		JFrame frame = new JFrame ();
-		frame.setSize((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth(), 600);
+		frame.setSize(recordsQuery.recommendedTableWidth(), 600);
 		frame.setVisible(true);
 		
 		s.setVisible(true);
