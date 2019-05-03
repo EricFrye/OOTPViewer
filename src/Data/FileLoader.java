@@ -11,7 +11,7 @@ import java.util.*;
 public class FileLoader implements Runnable {
 
 	private Scanner fd;
-	private List <Entity> data;
+	private Data data;
 	private Map <String, Integer> mappings;
 	private File src;
 	private int entitiesLoaded;
@@ -22,7 +22,7 @@ public class FileLoader implements Runnable {
 	 * @param data Reference to Holder.data
 	 * @param mappings Reference to Holder.mappings
 	 */
-	public FileLoader (File src, Scanner fd, List <Entity> data, Map <String, Integer> mappings) {
+	public FileLoader (File src, Scanner fd, Data data, Map <String, Integer> mappings) {
 		this.fd = fd;
 		this.data = data;
 		this.mappings = mappings;
@@ -36,11 +36,10 @@ public class FileLoader implements Runnable {
 		while (fd.hasNextLine()) {
 
 			String line = fd.nextLine();
+			String [] toAdd = line.split(",");
 
-			Entity toAdd = new Entity (line);
-
-			synchronized (mappings) {
-				data.add(toAdd);
+			synchronized (this.data) {
+				data.addEntity(toAdd);
 				entitiesLoaded++;
 			}
 

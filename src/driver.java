@@ -53,9 +53,10 @@ public class driver {
 			e.printStackTrace();
 		}
 		
-		QueryResult recordsQuery = records.query("team_id=15");
+		QueryResult recordsQuery = records.query("team_id=1");
+		Holder selected = recordsQuery.select("year,w,l,pos,gb,pct");
 		
-		HolderTable phillySabresRecord = HolderTable.generateHolderTable(recordsQuery.select("year,w,l,pos,gb,pct"), "w,l");
+		HolderTable phillySabresRecord = HolderTable.generateHolderTable(selected, "w,l");
 		JScrollPane s = new JScrollPane (phillySabresRecord);
 		
 		JFrame frame = new JFrame ();

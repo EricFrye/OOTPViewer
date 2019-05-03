@@ -18,7 +18,7 @@ import java.io.*;
 public class Holder {
 	
 	protected Map <String, Integer> mappings; //maps the col names to their index. the index in the list is the index in the report
-	protected List <Entity> data; //holds the actual data
+	protected Data data; //holds the actual data
 	protected Type [] types; //stores the type for each field
 	private String directoryPath;
 	private String fileName;
@@ -31,7 +31,6 @@ public class Holder {
 	public Holder (String directoryPath, String fileName) {
 		
 		this.mappings = new HashMap <String, Integer> ();
-		this.data = new ArrayList <Entity> ();
 		this.directoryPath = directoryPath;
 		this.fileName = fileName;
 		this.types = Utilities.loadTypes("settings\\fileData", "team_record_history.csv");
@@ -46,7 +45,7 @@ public class Holder {
 	 * @param data
 	 * @param types types for the entities
 	 */
-	protected Holder (Map <String, Integer> mappings, List <Entity> data, Type [] types) {
+	protected Holder (Map <String, Integer> mappings, Data data, Type [] types) {
 		this.directoryPath = "";
 		this.fileName = "";
 		this.mappings = mappings;
@@ -80,12 +79,15 @@ public class Holder {
 					this.mappings.put(headers[j], j);
 				}
 				
+				this.data = new Data (headers.length);
+				
 			}
 			
 			FileLoader curWorker = new FileLoader (curFile, curInput, this.data, this.mappings);
 			workers[i] = new Thread (curWorker);
 			
 		}
+		
 		
 		for (Thread curWorker: workers) {
 			curWorker.start();
@@ -94,6 +96,7 @@ public class Holder {
 		for (Thread curWorker: workers) {
 			curWorker.join();
 		}
+		
 		
 		System.out.println(String.format("Run time for loading %s was %f seconds.", this.fileName, (System.currentTimeMillis()-startTime)/1000.0));
 
@@ -107,21 +110,21 @@ public class Holder {
 	public QueryResult query (String query) {
 		
 		List <Query> queries = LogicalStatement.parse(query);
-		List <Entity> ret = new LinkedList <Entity> ();
+		Data ret = new Data (this.types.length);
 		
-		for (Entity curEnt: data) {
-			
-			boolean success;
+		for (int curDataRow = 0; curDataRow < data.numRows(); curDataRow++) {
 			
 			try {
-				success = curEnt.query(mappings, queries);
+				
+				String [] ent = data.query(curDataRow, mappings, queries);
+				
+				if (ent != null) {
+					ret.addEntity(ent);
+				}
+				
 			}
 			catch (Exception e) {
-				success = false;
-			}
-			
-			if (success) {
-				ret.add(curEnt);
+				return null;
 			}
 			
 		}
@@ -134,11 +137,7 @@ public class Holder {
 	public String buildReport () {
 		
 		String ret = "";
-		
-		for (Entity curEnt: data) {
-			
-			
-		}
+	
 		
 		return ret;
 		
@@ -148,7 +147,7 @@ public class Holder {
 	 * @return The count of entries in this Holder
 	 */
 	public int numEntities () {
-		return data.size();
+		return data.numRows();
 	}
 	
 	/**
@@ -183,8 +182,8 @@ public class Holder {
 		
 		ret += String.join(",", this.mappings()) + "\n";
 		
-		for (Entity curEnt: data) {
-			ret += curEnt.asCSV();
+		for (int curRow = 0; curRow < this.data.numRows(); curRow++) {
+			ret += data.asCSV(curRow);
 		}
 		
 		return ret;
@@ -205,12 +204,12 @@ public class Holder {
 				
 	}
 	
-	protected List <Entity> getData () {
+	protected Data getData () {
 		return data;
 	}
 	
-	protected Entity getTop () {
-		return data.size() == 0 ? null : data.get(0);
+	protected String [] getTop () {
+		return data.numRows() == 0 ? null : data.getEntity(0);
 	}
 	
 	/**
@@ -235,7 +234,7 @@ public class Holder {
 	 * @return A copy of the string array representation of the Entity's data
 	 */
 	public String [] getEntityVal (int index) {
-		return data.get(index).getData();
+		return data.numRows() == 0  || index >= data.numRows() ? null : data.getEntity(index);
 	}
 	
 	/**
@@ -253,12 +252,10 @@ public class Holder {
 			
 			int dataIndex = mappings.get(curField);
 			double total = 0; 
-					
-			for (Entity curEntity: data) {
-				
-				double curVal = Double.parseDouble(curEntity.getData(dataIndex));
-				total += curVal;
-				
+			String [] col = this.data.getColumn(dataIndex);
+			
+			for (int curRow = 0; curRow < col.length; curRow++) {
+				total += Double.parseDouble(col[curRow]);
 			}
 			
 			ret[dataIndex] = types[dataIndex].equals(Type.DOUBLE) ? String.format("%.2f", total) : String.format("%d", (int)total);
@@ -274,16 +271,20 @@ public class Holder {
 	 * @param str Of the form BEGIN_REGEX([\w+])([,\w+])*END_REGEX
 	 * @return A new Holder object that has entities with fields only specified by str
 	 */
+	
 	public Holder select (String str) {
 		
 		String [] newFields = str.split(",");
 		Map <String, Integer> newMappings = new HashMap <String, Integer> ();
-		List <Entity> newEntities = new ArrayList <Entity> ();
+		Data newData = new Data (this.data.numRows(), newFields.length);
 		Type [] newTypes = new Type [newFields.length];
 		
 		//select the new types
 		for (int newTypeIndex = 0; newTypeIndex < newFields.length; newTypeIndex++) {
-			newTypes[newTypeIndex] = this.types[this.mappings.get(newFields[newTypeIndex])];
+			String curField = newFields[newTypeIndex];
+			int curFieldIndex = this.mappings.get(curField);
+			Type curFieldType = this.types[curFieldIndex];
+			newTypes[newTypeIndex] = curFieldType;
 		}
 		
 		//build the new mapping map
@@ -293,17 +294,22 @@ public class Holder {
 		}
 		
 		//build the new entities list
-		for (Entity curEnt: this.data) {
-			Entity toAdd = curEnt.select(newFields, this.mappings);
-			newEntities.add(toAdd);
+		for (int curFieldIndex = 0; curFieldIndex < newFields.length; curFieldIndex++) {
+			
+			String curField = newFields[curFieldIndex];
+			int colIndex = this.mappings.get(curField);
+			String [] curFields = this.data.getColumn(colIndex);
+			newData.writeColumn(curFieldIndex, curFields);
+			
 		}
 		
-		return new Holder (newMappings, newEntities, newTypes);
+		return new Holder (newMappings, newData, newTypes);
 		
 	}
 	
 	public int recommendedTableWidth () {
 		return this.types.length * 25;
 	}
+	
 	
 }

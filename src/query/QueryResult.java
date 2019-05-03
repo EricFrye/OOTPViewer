@@ -1,6 +1,8 @@
 package query;
 
 import java.util.*;
+
+import Data.Data;
 import Data.Entity;
 import Data.Holder;
 import Data.Type;
@@ -21,7 +23,7 @@ public class QueryResult extends Holder{
 	 * @param mappings The string to index mappings for the fields
 	 * @param types Array containing the types of the fields
 	 */
-	public QueryResult (List <Entity> result, List <Query> query, Map <String, Integer> mappings, Type [] types) {
+	public QueryResult (Data result, List <Query> query, Map <String, Integer> mappings, Type [] types) {
 		
 		super(mappings, result, types);
 		this.query = query;
@@ -32,8 +34,8 @@ public class QueryResult extends Holder{
 	 * Gets the first result found for this query
 	 * @return null if nothing found, otherwise the first Entity.  This is a copy of the Entity, not a reference
 	 */
-	public Entity getTop () {
-		return new Entity(super.getTop());
+	public String [] getTop () {
+		return super.getTop();
 	}
 	
 	/**
@@ -43,8 +45,9 @@ public class QueryResult extends Holder{
 	 */
 	public String getTopField (String field) {
 		
-		Entity top = super.getTop();
-		return top == null ? "NaN (No Result)" : top.getData(this.mappings.get(field));
+		String [] top = getTop();
+		
+		return top == null ? "NaN (No Result)" : top[(this.mappings.get(field))];
 		
 	}	
 	
