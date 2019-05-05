@@ -36,6 +36,7 @@ public class FileLoader implements Runnable {
 		while (fd.hasNextLine()) {
 
 			String line = fd.nextLine();
+			line = line.replaceAll("\"", "");
 			String [] toAdd = line.split(",");
 
 			synchronized (this.data) {

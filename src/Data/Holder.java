@@ -227,7 +227,16 @@ public class Holder {
 		return ret;
 		
 	}
-
+	
+	/**
+	 * @param curField Name of the field
+	 * @return True if the map has this field, false otherwise
+	 */
+	public boolean containsField (String curField) {
+		return this.mappings.containsKey(curField);
+	}
+	
+	
 	/**
 	 * 
 	 * @param index The index of the Entity that is desired
@@ -271,7 +280,6 @@ public class Holder {
 	 * @param str Of the form BEGIN_REGEX([\w+])([,\w+])*END_REGEX
 	 * @return A new Holder object that has entities with fields only specified by str
 	 */
-	
 	public Holder select (String str) {
 		
 		String [] newFields = str.split(",");
@@ -311,5 +319,109 @@ public class Holder {
 		return this.types.length * 25;
 	}
 	
+	/**
+	 * 
+	 * @return The amount of fields in the data
+	 */
+	public int numFields () {
+		return this.mappings.size();
+	}
+	
+	/**
+	 * Gets the type corresponding to the given column
+	 * @param index The index
+	 * @return The type, or null if the index is OOB
+	 */
+	public Type getType (int index) {
+		return index < 0 || index >= types.length ? null : types[index];
+	}
+	
+	/**
+	 * @param field Name of the field searching for
+	 * @return Index that field is mapped to in this Holder
+	 */
+	public int getFieldIndex (String field) {
+		return this.mappings.containsKey(field) ? this.mappings.get(field) : -1;
+	}
+	
+	public Holder join (Holder other, String fieldOn) throws IllegalArgumentException {
+		
+		if (!this.containsField(fieldOn) || !other.containsField(fieldOn)) {
+			throw new IllegalArgumentException ("Field not contained in table.");
+		}
+		
+		int joinIndex = this.getFieldIndex(fieldOn);
+		int otherJoinIndex = other.getFieldIndex(fieldOn);
+		
+		//create the new types array
+		int numNewFields = this.numFields() + other.numFields() - 1;
+		Type [] joinedTypes = new Type [numNewFields];
+		
+		for (int typeIndex = 0; typeIndex < this.numFields(); typeIndex++) {
+			joinedTypes[typeIndex] = getType(typeIndex);
+		}
+		
+		//we need to avoid including the same field twice
+		int skipIndex = otherJoinIndex;
+		
+		int skipCount = 0;
+		
+		for (int typeIndex = 0; typeIndex < other.numFields(); typeIndex++) {
+			
+			if (typeIndex != skipIndex) {
+				joinedTypes[typeIndex+this.numFields()-skipCount] = other.getType(typeIndex);
+			}
+			
+			//the index shouldnt go up on a skip iteration
+			else {
+				skipCount++;
+			}
+			
+		}
+		
+		//create the mappings hashmap
+		String [] orderedFields = this.mappings();
+		String [] otherOrderedFields = other.mappings();
+		
+		Map <String, Integer> joinedMappings = new HashMap <String, Integer> (); 
+		skipCount = 0;
+		
+		for (int curOrderedIndex = 0; curOrderedIndex < orderedFields.length; curOrderedIndex++) {
+			joinedMappings.put(orderedFields[curOrderedIndex], curOrderedIndex);
+		}
+		
+		for (int curOrderedIndex = 0; curOrderedIndex < otherOrderedFields.length; curOrderedIndex++) {
+
+			if (curOrderedIndex != skipIndex) {
+				joinedMappings.put(otherOrderedFields[curOrderedIndex], orderedFields.length+curOrderedIndex-skipCount);
+			}
+			
+			//the index shouldnt go up on a skip iteration
+			else {
+				skipCount++;
+			}
+			
+		}
+		
+		Data joinedData = new Data (joinedTypes.length);
+		
+		for (int curDataIndex = 0; curDataIndex < this.data.numRows(); curDataIndex++) {
+			
+			String [] dataEnt = this.data.getEntity(curDataIndex);
+			
+			for (int curOtherDataIndex = 0; curOtherDataIndex < other.data.numRows(); curOtherDataIndex++) {
+				
+				String [] otherDataEnt = other.data.getEntity(curOtherDataIndex);
+				
+				if (dataEnt[joinIndex].equals(otherDataEnt[otherJoinIndex])) {
+					joinedData.enterJoinEntity(dataEnt, otherDataEnt, skipIndex);
+				}
+			}
+			
+		}
+		
+		return new Holder (joinedMappings, joinedData, joinedTypes);
+		
+	}
 	
 }

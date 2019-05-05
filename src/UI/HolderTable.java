@@ -26,13 +26,16 @@ public class HolderTable extends JTable {
 		String [] colNames = table.mappings();
 		int numEntries = table.numEntities(); 
 		int numExtraRows = 1; //summarization row
-		Object [][] data = new Object [numEntries+numExtraRows][colNames.length];
+		int numHeaderRows = 1;
+		Object [][] data = new Object [numEntries+numExtraRows+numHeaderRows][colNames.length];
+		
+		data[0] = table.mappings();
 		
 		for (int dataIndex = 0; dataIndex < numEntries; dataIndex++) {
-			data[dataIndex] = table.getEntityVal(dataIndex);
+			data[dataIndex+numHeaderRows] = table.getEntityVal(dataIndex);
 		}
 		
-		data[numEntries] = table.summarize(fieldsSummarize);
+		data[numEntries+numHeaderRows] = table.summarize(fieldsSummarize);
 		
 		return new HolderTable (data, colNames);
 		

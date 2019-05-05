@@ -52,15 +52,25 @@ public class driver {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+				
+		fileName = "teams";
+		Holder teams = new Holder(path, fileName);
 		
-		QueryResult recordsQuery = records.query("team_id=1");
-		Holder selected = recordsQuery.select("year,w,l,pos,gb,pct");
+		try {
+			teams.loadInfo();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
-		HolderTable phillySabresRecord = HolderTable.generateHolderTable(selected, "w,l");
-		JScrollPane s = new JScrollPane (phillySabresRecord);
+		teams = teams.query("nickname=Sabres&&name=Philadelphia");
+		teams = teams.select("team_id,name,abbr,nickname");
+		records = records.select("year,team_id,w,l,pct");
+		Holder recordsTeams = teams.join(records, "team_id");
+		
+		HolderTable s = HolderTable.generateHolderTable(recordsTeams, "w,l");
 		
 		JFrame frame = new JFrame ();
-		frame.setSize(recordsQuery.recommendedTableWidth(), 600);
+		frame.setSize(recordsTeams.recommendedTableWidth(), 600);
 		frame.setVisible(true);
 		
 		s.setVisible(true);

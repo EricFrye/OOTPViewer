@@ -168,4 +168,36 @@ public class Data {
 		
 	}
 	
+	/**
+	 * Insertion of data for a join operation
+	 * @param data String array of main joiner
+	 * @param otherData String arary of other joiner
+	 * @param skipIndex Index from otherData that should be skipped
+	 */
+	public void enterJoinEntity (String [] data, String [] otherData, int skipIndex) {
+		
+		String [] ent = new String [data.length + otherData.length - 1];
+		
+		for (int dataIndex = 0; dataIndex < data.length; dataIndex++) {
+			ent[dataIndex] = data[dataIndex];
+		}
+		
+		int skipCount = 0;
+		
+		for (int otherDataIndex = 0; otherDataIndex < otherData.length; otherDataIndex++) {
+			
+			if (otherDataIndex != skipIndex) {
+				ent[otherDataIndex + data.length - skipCount] = otherData[otherDataIndex];
+			}
+			
+			else {
+				skipCount++;
+			}
+			
+		}
+		
+		this.addEntity(ent);
+		
+	}
+	
 }
