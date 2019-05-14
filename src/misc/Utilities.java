@@ -1,5 +1,7 @@
 package misc;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.io.*;
 
 import Data.Type;
@@ -47,5 +49,168 @@ public class Utilities {
 		
 	}
 	
+	/**
+	 * Checks if test is in the array comp
+	 * @param test The String to check
+	 * @param comp The array to check for containment
+	 * @return True if test is in comp, False otherwise
+	 */
+	public static boolean in (String test, String [] comp) {
+		
+		for (String cur: comp) {
+			
+			if (test.equals(cur)) {
+				return true;
+			}
+			
+		}
+		
+		return false;
+		
+	}
+	
+	/**
+	 * Finds the amount of unique strings in the two arrays
+	 */
+	public static int numUnique (String [] first, String [] second) {
+		
+		Map <String, Object> test = new HashMap <String, Object> ();
+		
+		for (String cur: first) {
+			
+			if (!test.containsKey(cur)) {
+				test.put(cur, new Object());
+			}
+			
+		}
+		
+		for (String cur: second) {
+			
+			if (!test.containsKey(cur)) {
+				test.put(cur, new Object());
+			}
+			
+		}
+		
+		return test.size();
+		
+	}
+	
+	/**
+	 * Adds the string toInsert at the index given.  toInsert will have an integer appended to the end if it is not unique in  arr.  arr will be expanded if there is not enough space
+	 * @param arr
+	 * @param index
+	 * @param toInsert
+	 * @return Array of strings with toInsert added
+	 */
+	public static String [] insert (String [] arr, String toInsert) {
+		
+		int index = firstNonNullIndex(arr)+1;
+		
+		//check if our array needs to get bigger
+		if (index == arr.length) {
+			arr = growArray(arr);
+		}
+		
+		Pattern p = Pattern.compile("^"+toInsert+"(\\d*)$");
+		int max = 0;
+		
+		for (int curIndex = 0; curIndex < index; curIndex++) {
+			
+			Matcher m = p.matcher(arr[curIndex]);
+			
+			if (m.find()) {
+				String val = m.group(1);
+				
+				if (val.length() != 0) {
+					max = Math.max(max, Integer.parseInt(val)+1);
+				}
+				
+				else {
+					max = 1;
+				}
+				
+			}
+			
+		}
+		
+		arr[index] = toInsert + (max == 0 ? "" : max);
+		return arr;
+		
+	}
+	
+	/**
+	 * 
+	 * @param arr
+	 * @return The index corresponding to the first non null index in arr
+	 */
+	public static int firstNonNullIndex (String [] arr) {
+		
+		int size = arr.length-1;
+		
+		//determine the rightmost index where null is not found
+		while (size >= 0 && arr[size] == null) {
+			size--;
+		}
+		
+		return size;
+		
+	}
+	
+	/**
+	 * @param cur
+	 * @return cur doubled in size
+	 */
+	public static String [] growArray (String [] cur) {
+		
+		String [] ret = new String [cur.length * 2]; 
+		
+		for (int i = 0; i < cur.length; i++) {
+			ret[i] = cur[i];
+		}
+		
+		return ret;
+		
+	}
+	
+	/**
+	 * Removes elements from arr that are null
+	 * @param arr The array
+	 * @param size The true size of the array
+	 * @return
+	 */
+	public static String [] shrinkArray (String [] arr) {
+		
+		int size = firstNonNullIndex(arr)+1;
+		
+		String [] ret = new String [size];
+		
+		for (int i = 0; i < size; i++) {
+			ret[i] = arr[i];
+		}
+		
+		return ret;
+		
+	}
+	
+	public static void main (String [] args) {
+		
+		String [] arr = new String [2];
+				
+		arr = insert(arr, "player_id");
+		arr = insert(arr, "team_id");
+		arr = insert(arr, "team_id");
+		arr = insert(arr, "league_id");
+		arr = insert(arr, "team_id");
+		arr = insert(arr, "t");
+		arr = insert(arr, "t");
+		
+		arr = shrinkArray(arr);
+		
+		for (int i = 0; i < arr.length; i++) {
+			System.out.println(arr[i]);
+		}
+		
+	}
 	
 }

@@ -44,37 +44,45 @@ public class driver {
 		HolderTable phillySabresRecord = HolderTable.generateHolderTable(playerBattingStats,"h,d,t,hr,r,rbi,k,g,gs,sb,cs,bb,ibb,ab,war*");
 		*/
 		
-		String fileName = "team_history_record";
+		String fileName = "players_career_batting_stats";
+		String fileName1 = "players";
+		String fileName2 = "teams";
 		
-		Holder records = new Holder(path, fileName);
-		try {
-			records.loadInfo();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-				
-		fileName = "teams";
-		Holder teams = new Holder(path, fileName);
+		Holder playersStats = new Holder(path, fileName);
+		Holder players = new Holder(path, fileName1);
+		Holder teams = new Holder(path, fileName2);
 		
 		try {
+			playersStats.loadInfo();
+			players.loadInfo();
 			teams.loadInfo();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		teams = teams.query("nickname=Sabres&&name=Philadelphia");
-		teams = teams.select("team_id,name,abbr,nickname");
-		records = records.select("year,team_id,w,l,pct");
-		Holder recordsTeams = teams.join(records, "team_id");
+		String [] out = players.createNewOrderedFields(playersStats);
 		
-		HolderTable s = HolderTable.generateHolderTable(recordsTeams, "w,l");
+		for (String cur: out) {
+			System.out.println(cur);
+		}
+		
+		players = players.select("player_id,team_id,first_name,last_name");
+		
+		players = players.query("first_name=Bobby&&last_name=Betances");
+		playersStats = playersStats.query("league_id=100&&split_id=1");
+		
+		playersStats = playersStats.join(players, "player_id");
+		playersStats = playersStats.select("first_name,last_name,team_id,hr,war");
+		playersStats = playersStats.join(teams, "team_id");
+		
+		Holder finalTable = playersStats.select("nickname,first_name,last_name,hr,war");
+		
+		HolderTable table = HolderTable.generateHolderTable(finalTable, "");
 		
 		JFrame frame = new JFrame ();
-		frame.setSize(recordsTeams.recommendedTableWidth(), 600);
-		frame.setVisible(true);
 		
-		s.setVisible(true);
-		frame.add(s);
+		frame.add(table);
+		frame.setVisible(true);
 		
 	}
 	

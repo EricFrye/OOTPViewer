@@ -33,7 +33,7 @@ public class Holder {
 		this.mappings = new HashMap <String, Integer> ();
 		this.directoryPath = directoryPath;
 		this.fileName = fileName;
-		this.types = Utilities.loadTypes("settings\\fileData", "team_record_history.csv");
+		this.types = Utilities.loadTypes("settings\\fileData", fileName + ".csv");
 		
 	}
 	
@@ -189,20 +189,7 @@ public class Holder {
 		return ret;
 		
 	}
-	
-	public static void main (String [] args) {
-		
-		String dir = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
-		String file = "players_game_batting";
-		
-		Holder players = new Holder (dir, file);
-		try {
-			players.loadInfo();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-				
-	}
+
 	
 	protected Data getData () {
 		return data;
@@ -218,7 +205,7 @@ public class Holder {
 	 */
 	public String [] mappings () {
 		
-		String [] ret = new String [mappings.size()];
+		String [] ret = new String [mappings.keySet().size()];
 		
 		for (String curField: mappings.keySet()) {
 			ret[mappings.get(curField)] = curField;
@@ -253,8 +240,13 @@ public class Holder {
 	 */
 	public String [] summarize (String str) {
 		
-		String [] fields = str.split(","); 
 		String [] ret = new String [mappings.size()];
+		
+		if (str.length() == 0) {
+			return ret;
+		}
+		
+		String [] fields = str.split(","); 
 		
 		//outerloop over the fields so we only have to access the index once
 		for (String curField: fields) {
@@ -354,54 +346,35 @@ public class Holder {
 		int otherJoinIndex = other.getFieldIndex(fieldOn);
 		
 		//create the new types array
-		int numNewFields = this.numFields() + other.numFields() - 1;
+		int numNewFields = this.numFields() + other.numFields();
 		Type [] joinedTypes = new Type [numNewFields];
 		
 		for (int typeIndex = 0; typeIndex < this.numFields(); typeIndex++) {
 			joinedTypes[typeIndex] = getType(typeIndex);
 		}
 		
-		//we need to avoid including the same field twice
-		int skipIndex = otherJoinIndex;
-		
-		int skipCount = 0;
-		
 		for (int typeIndex = 0; typeIndex < other.numFields(); typeIndex++) {
-			
-			if (typeIndex != skipIndex) {
-				joinedTypes[typeIndex+this.numFields()-skipCount] = other.getType(typeIndex);
-			}
-			
-			//the index shouldnt go up on a skip iteration
-			else {
-				skipCount++;
-			}
-			
+			joinedTypes[typeIndex+this.numFields()] = other.getType(typeIndex);
 		}
 		
 		//create the mappings hashmap
-		String [] orderedFields = this.mappings();
-		String [] otherOrderedFields = other.mappings();
+		//String [] orderedFields = this.mappings();
+		//String [] otherOrderedFields = other.mappings();
 		
+		String [] joinedOrderedFields = this.createNewOrderedFields(other);
 		Map <String, Integer> joinedMappings = new HashMap <String, Integer> (); 
-		skipCount = 0;
 		
-		for (int curOrderedIndex = 0; curOrderedIndex < orderedFields.length; curOrderedIndex++) {
-			joinedMappings.put(orderedFields[curOrderedIndex], curOrderedIndex);
+		for (int curJoinedOrderedIndex = 0; curJoinedOrderedIndex < joinedOrderedFields.length; curJoinedOrderedIndex++) {
+			joinedMappings.put(joinedOrderedFields[curJoinedOrderedIndex], curJoinedOrderedIndex);
 		}
 		
-		for (int curOrderedIndex = 0; curOrderedIndex < otherOrderedFields.length; curOrderedIndex++) {
-
-			if (curOrderedIndex != skipIndex) {
-				joinedMappings.put(otherOrderedFields[curOrderedIndex], orderedFields.length+curOrderedIndex-skipCount);
-			}
-			
-			//the index shouldnt go up on a skip iteration
-			else {
-				skipCount++;
-			}
-			
-		}
+		//for (int curOrderedIndex = 0; curOrderedIndex < orderedFields.length; curOrderedIndex++) {
+		//	joinedMappings.put(orderedFields[curOrderedIndex], curOrderedIndex);
+		//}
+		
+		//for (int curOrderedIndex = 0; curOrderedIndex < otherOrderedFields.length; curOrderedIndex++) {
+		//	joinedMappings.put(otherOrderedFields[curOrderedIndex], orderedFields.length+curOrderedIndex);	
+		//}
 		
 		Data joinedData = new Data (joinedTypes.length);
 		
@@ -414,13 +387,50 @@ public class Holder {
 				String [] otherDataEnt = other.data.getEntity(curOtherDataIndex);
 				
 				if (dataEnt[joinIndex].equals(otherDataEnt[otherJoinIndex])) {
-					joinedData.enterJoinEntity(dataEnt, otherDataEnt, skipIndex);
+					joinedData.enterJoinEntity(dataEnt, otherDataEnt);
 				}
 			}
 			
 		}
 		
 		return new Holder (joinedMappings, joinedData, joinedTypes);
+		
+	}
+	
+	public String [] createNewOrderedFields (Holder other) {
+		
+		String [] orderedFields = this.mappings();
+		String [] otherOrderedFields = other.mappings();
+		
+		for (String curOtherField: otherOrderedFields) {
+			orderedFields = Utilities.insert(orderedFields, curOtherField);
+		}
+		
+		return Utilities.shrinkArray(orderedFields);
+		
+	}
+	
+	public static void main (String [] args) {
+		
+		String path = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
+		
+		String fileName = "players_career_batting_stats";
+		String fileName1 = "players";
+		String fileName2 = "teams";
+		
+		Holder playersStats = new Holder(path, fileName);
+		Holder players = new Holder(path, fileName1);
+		Holder teams = new Holder(path, fileName2);
+		
+		try {
+			playersStats.loadInfo();
+			players.loadInfo();
+			teams.loadInfo();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		String [] out = players.createNewOrderedFields(playersStats);
 		
 	}
 	
