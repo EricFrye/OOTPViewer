@@ -190,4 +190,20 @@ public class Data {
 		
 	}
 	
+	/**
+	 * @param col
+	 * @return The length of the longest field value for a specified column
+	 */
+	public int lengthOfLongestEntry(int col) {
+		
+		int max = 0;
+		
+		for (int curRowIndex = 0; curRowIndex < this.numRows; curRowIndex++) {
+			max = Math.max(max, data[curRowIndex][col].length());
+		}
+		
+		return max;
+		
+	}
+	
 }

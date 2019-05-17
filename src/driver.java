@@ -1,3 +1,4 @@
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.*;
 
@@ -5,6 +6,7 @@ import javax.swing.*;
 
 import Data.Holder;
 import UI.HolderTable;
+import UI.MainFrame;
 import query.*;
 
 public class driver {
@@ -15,6 +17,8 @@ public class driver {
 		//view.setVisible(true);
 		
 		String path = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
+		final int frameWidth = 800;
+		final int frameHeight = 600;
 		
 		/*
 		String playersPath = "players";
@@ -47,42 +51,37 @@ public class driver {
 		String fileName = "players_career_batting_stats";
 		String fileName1 = "players";
 		String fileName2 = "teams";
+		String fileName3 = "leagues";
 		
 		Holder playersStats = new Holder(path, fileName);
 		Holder players = new Holder(path, fileName1);
 		Holder teams = new Holder(path, fileName2);
+		Holder leagues = new Holder(path, fileName3);
 		
 		try {
 			playersStats.loadInfo();
 			players.loadInfo();
 			teams.loadInfo();
+			leagues.loadInfo();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		String [] out = players.createNewOrderedFields(playersStats);
-		
-		for (String cur: out) {
-			System.out.println(cur);
-		}
-		
 		players = players.select("player_id,team_id,first_name,last_name");
 		
-		players = players.query("first_name=Bobby&&last_name=Betances");
-		playersStats = playersStats.query("league_id=100&&split_id=1");
+		players = players.query("first_name=German&&last_name=Castro");
+		playersStats = playersStats.query("split_id=1");
 		
 		playersStats = playersStats.join(players, "player_id");
-		playersStats = playersStats.select("first_name,last_name,team_id,hr,war");
 		playersStats = playersStats.join(teams, "team_id");
+		playersStats = playersStats.join(leagues, "league_id");
 		
-		Holder finalTable = playersStats.select("nickname,first_name,last_name,hr,war");
+		Holder finalTable = playersStats.select("abbr1,nickname,first_name,last_name,hr,war");
 		
-		HolderTable table = HolderTable.generateHolderTable(finalTable, "");
+		HolderTable table = HolderTable.generateHolderTable(playersStats, "hr,war");
 		
-		JFrame frame = new JFrame ();
-		
-		frame.add(table);
-		frame.setVisible(true);
+		MainFrame view = new MainFrame (frameWidth, frameHeight);
+		view.addHolderTable(table, new Dimension(400,300));
 		
 	}
 	

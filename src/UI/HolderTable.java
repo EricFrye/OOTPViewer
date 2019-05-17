@@ -27,17 +27,26 @@ public class HolderTable extends JTable {
 		int numEntries = table.numEntities(); 
 		int numExtraRows = 1; //summarization row
 		int numHeaderRows = 1;
-		Object [][] data = new Object [numEntries+numExtraRows+numHeaderRows][colNames.length];
-		
-		data[0] = table.mappings();
+		Object [][] data = new Object [numEntries+numExtraRows][colNames.length];
 		
 		for (int dataIndex = 0; dataIndex < numEntries; dataIndex++) {
-			data[dataIndex+numHeaderRows] = table.getEntityVal(dataIndex);
+			data[dataIndex] = table.getEntityVal(dataIndex);
 		}
 		
-		data[numEntries+numHeaderRows] = table.summarize(fieldsSummarize);
+		data[numEntries] = table.summarize(fieldsSummarize);
 		
-		return new HolderTable (data, colNames);
+		HolderTable ret = new HolderTable (data, colNames);
+		ret.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		
+		/*
+		for (int curColNameIndex = 0; curColNameIndex < colNames.length; curColNameIndex++) {
+			int width = table.recommendedColumnWidth(colNames[curColNameIndex]);
+			System.out.println(width);
+			ret.getColumnModel().getColumn(curColNameIndex).setPreferredWidth(width);
+		}
+		*/
+		
+		return ret;
 		
 	}
 	

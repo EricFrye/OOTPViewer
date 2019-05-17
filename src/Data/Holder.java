@@ -397,6 +397,11 @@ public class Holder {
 		
 	}
 	
+	/**
+	 * Generate the mappings for this and other being joined together. The fields in this are first and other second.  Any duplicate named fields will have the lowest available number appended to the end of the field name
+	 * @param other
+	 * @return String array of the new fields
+	 */
 	public String [] createNewOrderedFields (Holder other) {
 		
 		String [] orderedFields = this.mappings();
@@ -408,6 +413,22 @@ public class Holder {
 		
 		return Utilities.shrinkArray(orderedFields);
 		
+	}
+	
+	/**
+	 * @param field
+	 * @return The minimum column width in pixels that will show all data for this column
+	 */
+	public int recommendedColumnWidth (String field) {
+		
+		final int mult = 10;
+		int entryLen = recommendedColumnWidth(this.mappings.get(field));
+		return mult * Math.max(field.length(), entryLen);
+		
+	}
+	
+	private int recommendedColumnWidth (int col) {
+		return data.lengthOfLongestEntry(col);
 	}
 	
 	public static void main (String [] args) {
