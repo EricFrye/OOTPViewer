@@ -119,6 +119,7 @@ public class Utilities {
 			
 			Matcher m = p.matcher(arr[curIndex]);
 			
+			//field name match found
 			if (m.find()) {
 				String val = m.group(1);
 				

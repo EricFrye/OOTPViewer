@@ -21,32 +21,8 @@ public class driver {
 		String path = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
 		
 		MainFrame view = new MainFrame (500, 800);
-		
-		JTextField input = new JTextField(20);
-		
-		Action action = new AbstractAction() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				
-				Holder tab = new Holder (path, input.getText());
-				
-				try {
-					tab.loadInfo();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
-				HolderTable holderTab = HolderTable.generateHolderTable(tab, "");
-				view.addHolderTable(holderTab, new Dimension(400,300));
-				
-			}
-		};
-		
-		input.addActionListener(action);
-		input.setVisible(true);
-		view.addComp(input, "QueryInput");
-						
+		new QueryUI (view, 300, 400);
+			
 	}
 	
 }

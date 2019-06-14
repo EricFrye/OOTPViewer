@@ -40,11 +40,11 @@ public class MainFrame extends JFrame {
 		JScrollPane toAdd = new JScrollPane (table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		toAdd.setVisible(true);
 		
-		this.addComp(toAdd, "DisplayedTable");
+		this.addComp("DisplayedTable", toAdd);
 				
 	}
 	
-	public Component addComp (Component add, String ID) {
+	public Component addComp (String ID, Component add) {
 		
 		if (this.items.containsKey(ID)) {
 			throw new IllegalArgumentException (ID + " is already in this MainFrame");
