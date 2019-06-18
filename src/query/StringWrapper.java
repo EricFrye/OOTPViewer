@@ -3,17 +3,20 @@ package query;
 //a work around to allow strings to be passed by reference
 public class StringWrapper {
 	
-	private final char none = (char)0;
-	String value;
+	public final char none = (char)0;
+	private String value;
 	
 	public StringWrapper (String str) {
 		this.value = str;
 	}
 	
-	//look at the character 1 ahead
+	/**
+	 * look at the character 1 ahead
+	 * @return
+	 */
 	public char peekAhead () {
 		
-		if (value.length() < 2) {
+		if (value.length() <= 1) {
 			return none;
 		}
 		
@@ -23,7 +26,27 @@ public class StringWrapper {
 		
 	}
 	
-	//look at the next character
+	/**
+	 * Look ahead by a specified amount
+	 * @param by
+	 * @return
+	 */
+	public char peekAhead (int by) {
+		
+		if (value.length() <= (by)) {
+			return none;
+		}
+		
+		else {
+			return value.charAt(by);
+		}
+		
+	}
+	
+	/**
+	 * look at the current character
+	 * @return
+	 */
 	public char peek () {
 		
 		if (value.length() == 0) {
@@ -40,6 +63,10 @@ public class StringWrapper {
 		return value.length() != 0;
 	}
 	
+	/**
+	 * Advances the string by one index and returns the passed over character
+	 * @return
+	 */
 	public char consume () {
 		
 		//tried to read something that wasnt there. the user must have given us a bad string (assuming proper implementation, big if for me)
