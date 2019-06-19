@@ -10,6 +10,10 @@ public class StringWrapper {
 		this.value = str;
 	}
 	
+	public StringWrapper (StringWrapper str) {
+		this.value = str.value;
+	}
+	
 	/**
 	 * look at the character 1 ahead
 	 * @return
@@ -62,6 +66,7 @@ public class StringWrapper {
 	public boolean hasNext () {
 		return value.length() != 0;
 	}
+	
 	
 	/**
 	 * Advances the string by one index and returns the passed over character

@@ -19,6 +19,29 @@ public class QueryParser {
 		
 	}
 	
+	private String parseComparator (StringWrapper str) {
+		
+		String ret = "";
+		
+		parseWhiteSpace(str);
+		
+		while (isValidComparer(str.peek())) {
+			ret += str.consume();
+		}
+		
+		parseWhiteSpace(str);
+		return ret;
+		
+	}
+	
+	private void parseWhiteSpace (StringWrapper str) {
+		
+		while (str.peek() == ' ') {
+			str.consume();
+		}
+		
+	}
+	
 	//word := [ ]*[a-z|A-Z|0-9]+[ ]*
 	private String parseWord (StringWrapper str) {
 		
@@ -58,9 +81,7 @@ public class QueryParser {
 	}
 	
 	//table_selection := [FROM][word][join]*
-	private String parseTableSelection (StringWrapper str) {
-		
-		String ret = "";
+	private void parseTableSelection (StringWrapper str) {
 		
 		String FROM = parseWord(str); //read the FROM
 		
@@ -68,12 +89,16 @@ public class QueryParser {
 			throw new IllegalArgumentException("Incorrect parse - FROM expected");
 		}
 		
-		ret += FROM;
-		
 		String tableName = parseWord(str); //read the table name
-		ret += ' ' + tableName;
 		
-		return ret;
+		System.out.println(FROM);
+		System.out.println(tableName);
+		
+		while (nextWord(str).equals("JOIN")) {
+			parseJoinStatement(str);
+		}
+		
+
 		
 	}
 	
@@ -97,12 +122,6 @@ public class QueryParser {
 		}
 		
 		//reading the left half of the join condition
-		String leftTableRef = parseWord(str);
-		
-		if (str.consume() != '.') {
-			throw new IllegalArgumentException("Incorrect parse - . expected after table reference");
-		}
-		
 		String leftTableField = parseWord(str);
 		
 		//read the equal sign
@@ -111,23 +130,90 @@ public class QueryParser {
 		}
 		
 		//reading the right half of the join condition
-		String rightTableRef = parseWord(str);
-				
-		if (str.consume() != '.') {
-			throw new IllegalArgumentException("Incorrect parse - . expected after table reference");
-		}
-				
 		String rightTableField = parseWord(str);
 		
 		System.out.println(JOIN);
 		System.out.println(rightTable);
 		System.out.println(ON);
-		System.out.println(leftTableRef);
 		System.out.println(leftTableField);
-		System.out.println(rightTableRef);
 		System.out.println(rightTableField);
 		
+	}
+	
+	//quantifier := [WHERE][conditional]([AND|OR][conditional])*
+	private void parseQuantifier (StringWrapper str) {
 		
+		String WHERE = parseWord(str); //read where
+		
+		if (!WHERE.equals("WHERE")) {
+			throw new IllegalArgumentException("Incorrect parse - WHERE expected");
+		}
+		
+		System.out.println(WHERE);
+		
+		parseConditional(str); //parse the conditional
+		
+		String nextWord = nextWord(str);
+		
+		//parse any conditionals that follow
+		while (nextWord.equals("AND") || nextWord.equals("OR")) {
+			
+			String curLogicalConjunction = parseWord(str);			
+			System.out.println(curLogicalConjunction);
+			
+			parseConditional(str);
+			
+			nextWord = nextWord(str); //need to see if another conditional is coming
+			
+		}
+		
+	}
+	
+	//conditional := [word][=|<=|>=|<|>|<>][word]
+	private void parseConditional (StringWrapper str) {
+		
+		String field = parseWord(str);
+		String comparator = parseComparator(str);
+		String value = parseWord(str);
+		
+		System.out.println(field);
+		System.out.println(comparator);
+		System.out.println(value);
+		
+	}
+	
+	//query := [table_selection][SELECT][list_of_words][quantifier]
+	private void parseQuery (StringWrapper str) {
+		
+		parseTableSelection(str);
+		
+		String SELECT = parseWord(str);
+		
+		if (!SELECT.equals("SELECT")) {
+			throw new IllegalArgumentException ("Incorrect parse - SELECT expected");
+		}
+		
+		System.out.println(SELECT);
+		
+		String fields = parseListOfWords(str);
+		System.out.println(fields);
+		
+		if (str.peek() != none) {
+			parseQuantifier(str);
+		}
+			
+	}
+	
+	//read the next word in this StringWrapper.  the parameter is unaltered
+	private String nextWord (StringWrapper str) {
+		
+		StringWrapper tempStr = new StringWrapper (str);
+		return parseWord(tempStr);
+		
+	}
+	
+	private boolean isValidComparer (char check) {
+		return check == '<' || check == '>' || check == '=';
 	}
 	
 	private boolean isValidChar (char check) {
@@ -136,11 +222,11 @@ public class QueryParser {
 	
 	public static void main (String [] args) {
 		
-		String toParse = "  JOIN   players  ON   cities .  name  =   players .playerid";
+		String toParse = "FROM tableee JOIN tableeee2 ON playerid = playerid JOIN tab3 ON playerid = playerid SELECT ALL WHERE hits < 10 AND hits < 5";
 		StringWrapper pntr = new StringWrapper (toParse);
 
 		QueryParser parser = new QueryParser ();
-		parser.parseJoinStatement(pntr);
+		parser.parseQuery(pntr);
 		
 	}
 	
