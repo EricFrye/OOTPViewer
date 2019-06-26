@@ -214,4 +214,48 @@ public class Utilities {
 		
 	}
 	
+	/**
+	 * Append s to the end of arr
+	 * @param s
+	 * @param arr
+	 * @return
+	 */
+	public static String [] appendString (String s, String [] arr) {
+		
+		String [] newArr = new String [arr.length+1];
+		
+		for (int curStrIndex = 0; curStrIndex < arr.length; curStrIndex++) {
+			newArr[curStrIndex] = arr[curStrIndex];
+		}
+		
+		newArr[arr.length] = s;
+		return newArr;
+		
+	}
+	
+	/**
+	 * Append s2 to the end of s1
+	 * @param s1
+	 * @param s2
+	 * @return A single array
+	 */
+	public static String [] appendArray (String [] s1, String [] s2) {
+		
+		String [] newArr = new String [s1.length+s2.length];
+		
+		int lenS1 = s1.length;
+		int lenS2 = s2.length;
+		
+		for (int curS1Index = 0; curS1Index < lenS1; curS1Index++) {
+			newArr[curS1Index] = s1[curS1Index];
+		}
+		
+		for (int curS2Index = 0; curS2Index < lenS2; curS2Index++) {
+			newArr[lenS1+curS2Index] = s2[curS2Index];
+		}
+		
+		return newArr;
+		
+	}
+	
 }

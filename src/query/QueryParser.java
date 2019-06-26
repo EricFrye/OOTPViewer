@@ -3,20 +3,24 @@ package query;
 import java.util.LinkedList;
 import java.util.List;
 
+import misc.Utilities;
+
 public class QueryParser {
 	
-	private List <Operation> ops = new LinkedList <Operation> ();
 	private static QueryReservedWords reservedWords = new QueryReservedWords ();
 	private final char none = (char)0;
-
+	private List <String []> ops;
+	
+	public QueryParser () {
+		this.ops = new LinkedList <String []> ();
+	}
 	
 	/**
-	 * Parse user input into a List of Operations to be performed on a Holder
+	 * Parse user input into a List of of String arrays that can be used to fulfill the query string
 	 */
-	public void parseQuery (String str) {
-
-
-		
+	public List <String []> parseQuery (String str) {
+		parseQuery(new StringWrapper(str));
+		return this.ops;
 	}
 	
 	private String parseComparator (StringWrapper str) {
@@ -91,21 +95,18 @@ public class QueryParser {
 		
 		String tableName = parseWord(str); //read the table name
 		
-		System.out.println(FROM);
-		System.out.println(tableName);
+		String [] selection = new String [] {FROM, tableName};
 		
 		while (nextWord(str).equals("JOIN")) {
-			parseJoinStatement(str);
+			selection = Utilities.appendArray(selection, parseJoinStatement(str));
 		}
 		
-
+		this.ops.add(selection);
 		
 	}
 	
 	//join := [JOIN][word][ON][word.word][=][word.word]
-	private void parseJoinStatement (StringWrapper str) {
-		
-		String ret = "";
+	private String [] parseJoinStatement (StringWrapper str) {
 		
 		String JOIN = parseWord(str); //read the JOIN
 		
@@ -132,11 +133,7 @@ public class QueryParser {
 		//reading the right half of the join condition
 		String rightTableField = parseWord(str);
 		
-		System.out.println(JOIN);
-		System.out.println(rightTable);
-		System.out.println(ON);
-		System.out.println(leftTableField);
-		System.out.println(rightTableField);
+		return new String [] {JOIN, rightTable, ON, leftTableField, rightTableField};
 		
 	}
 	
@@ -148,10 +145,9 @@ public class QueryParser {
 		if (!WHERE.equals("WHERE")) {
 			throw new IllegalArgumentException("Incorrect parse - WHERE expected");
 		}
-		
-		System.out.println(WHERE);
-		
-		parseConditional(str); //parse the conditional
+				
+		String [] quantifier = new String [] {WHERE};
+		quantifier = Utilities.appendArray(quantifier, parseConditional(str)); //parse the conditional
 		
 		String nextWord = nextWord(str);
 		
@@ -159,26 +155,26 @@ public class QueryParser {
 		while (nextWord.equals("AND") || nextWord.equals("OR")) {
 			
 			String curLogicalConjunction = parseWord(str);			
-			System.out.println(curLogicalConjunction);
 			
-			parseConditional(str);
+			quantifier = Utilities.appendString(curLogicalConjunction, quantifier);
+			quantifier = Utilities.appendArray(quantifier, parseConditional(str));
 			
 			nextWord = nextWord(str); //need to see if another conditional is coming
 			
 		}
 		
+		this.ops.add(quantifier);
+		
 	}
 	
 	//conditional := [word][=|<=|>=|<|>|<>][word]
-	private void parseConditional (StringWrapper str) {
+	private String [] parseConditional (StringWrapper str) {
 		
 		String field = parseWord(str);
 		String comparator = parseComparator(str);
 		String value = parseWord(str);
 		
-		System.out.println(field);
-		System.out.println(comparator);
-		System.out.println(value);
+		return new String [] {field, comparator, value};
 		
 	}
 	
@@ -192,11 +188,10 @@ public class QueryParser {
 		if (!SELECT.equals("SELECT")) {
 			throw new IllegalArgumentException ("Incorrect parse - SELECT expected");
 		}
-		
-		System.out.println(SELECT);
-		
+
 		String fields = parseListOfWords(str);
-		System.out.println(fields);
+
+		this.ops.add(new String [] {SELECT, fields});
 		
 		if (str.peek() != none) {
 			parseQuantifier(str);
@@ -226,7 +221,17 @@ public class QueryParser {
 		StringWrapper pntr = new StringWrapper (toParse);
 
 		QueryParser parser = new QueryParser ();
-		parser.parseQuery(pntr);
+		List <String []> parsedQuery = parser.parseQuery(toParse);
+		
+		for (String [] curParsedPhrase: parsedQuery) {
+			
+			for (String curStr: curParsedPhrase) {
+				System.out.print(curStr + " ");
+			}
+			
+			System.out.println();
+			
+		}
 		
 	}
 	

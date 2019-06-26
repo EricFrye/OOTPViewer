@@ -26,7 +26,7 @@ public class Holder {
 	/***
 	 * Creates the InfoHolder object
 	 * @param directoryPath the path to the target data file
-	 * @param fileName the name of the file to load
+	 * @param fileName the name of the file to load (no file extension)
 	 */
 	public Holder (String directoryPath, String fileName) {
 		

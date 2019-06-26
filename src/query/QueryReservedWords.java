@@ -4,25 +4,40 @@ import java.util.*;
 
 public class QueryReservedWords {
 	
-	private List <String> resWords;
+	private static final String SELECT = "SELECT";
+	private static final String JOIN = "JOIN";
+	private static final String ON = "ON";
+	private static final String WHERE = "WHERE";
+	private static final String FROM = "FROM";
+	private static final String AND = "AND";
+	private static final String OR = "OR";
 	
-	public QueryReservedWords () {
-		
-		this.resWords = new ArrayList <String> ();
-		
-		//any keywords should be defined here
-		this.resWords.add("SELECT"); //specifies which fields to include
-		this.resWords.add("FROM"); //specifies which tables/files to pull data from
-		this.resWords.add("ALL"); //include all fields
-		this.resWords.add("WHERE"); //sets the conditional for which entities must evaluate TRUE to be included
-		
+	public static boolean isSelect (String check) {
+		return check.equals(SELECT);
 	}
 	
-	/**
-	 * Check if a string is a reserved word
-	 */
-	public boolean isKeyWord (String check) {
-		return this.resWords.contains(check);
+	public static boolean isJoin (String check) {
+		return check.equals(JOIN);
+	}
+	
+	public static boolean isOn (String check) {
+		return check.equals(ON);
+	}
+	
+	public static boolean isWhere (String check) {
+		return check.equals(WHERE);
+	}
+	
+	public static boolean isFrom (String check) {
+		return check.equals(FROM);
+	}
+	
+	public static boolean isAnd (String check) {
+		return check.equals(AND);
+	}
+	
+	public static boolean isOr (String check) {
+		return check.equals(OR);
 	}
 	
 }
