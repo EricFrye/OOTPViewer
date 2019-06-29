@@ -20,6 +20,17 @@ public class QueryParser {
 	 */
 	public List <String []> parseQuery (String str) {
 		parseQuery(new StringWrapper(str));
+		
+		for (String [] curParsedPhrase: ops) {
+			
+			for (String curStr: curParsedPhrase) {
+				System.out.print(curStr + " ");
+			}
+			
+			System.out.println();
+			
+		}
+		
 		return this.ops;
 	}
 	
@@ -217,7 +228,7 @@ public class QueryParser {
 	
 	public static void main (String [] args) {
 		
-		String toParse = "FROM tableee JOIN tableeee2 ON playerid = playerid JOIN tab3 ON playerid = playerid SELECT ALL WHERE hits < 10 AND hits < 5";
+		String toParse = "FROM teams JOIN team_history_record ON team_id = team_id SELECT ALL";
 		StringWrapper pntr = new StringWrapper (toParse);
 
 		QueryParser parser = new QueryParser ();

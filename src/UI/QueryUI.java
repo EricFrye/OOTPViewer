@@ -8,6 +8,8 @@ import java.util.*;
 import javax.swing.*;
 
 import Data.Holder;
+import query.Operations;
+import query.QueryParser;
 
 public class QueryUI {
 	
@@ -32,13 +34,10 @@ public class QueryUI {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				
-				Holder tab = new Holder ("data", search.getText());
+				QueryParser parser = new QueryParser();
+				List <String []> ops = parser.parseQuery(search.getText());
 				
-				try {
-					tab.loadInfo();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				Holder tab = Operations.performOps(ops);
 				
 				HolderTable holderTab = HolderTable.generateHolderTable(tab, "");
 				parent.addHolderTable(holderTab, new Dimension(400,300));
