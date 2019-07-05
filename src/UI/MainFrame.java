@@ -35,12 +35,12 @@ public class MainFrame extends JFrame {
 	 * @param table
 	 * @param size
 	 */
-	public void addHolderTable (HolderTable table, Dimension size) {
+	public void addHolderTable (String name, HolderTable table, Dimension size) {
 		
 		JScrollPane toAdd = new JScrollPane (table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		toAdd.setVisible(true);
 		
-		this.addComp("DisplayedTable", toAdd);
+		this.addComp(name, toAdd);
 				
 	}
 	

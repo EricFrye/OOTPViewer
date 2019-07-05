@@ -2,6 +2,8 @@ package query;
 import java.util.*;
 import java.util.regex.*;
 
+import misc.ArrayReader;
+
 /***
  * A Statement is a single line of text that can be parsed into a set of logical queries
  * @author Eric
@@ -29,6 +31,47 @@ public class LogicalStatement {
 			ret.add(q1);
 			index = m.end();		
 				
+		}
+		
+		return ret;
+		
+	}
+	
+	/**
+	 * Serves as the middleman for an operation to a string that can be understood by LogicalStatement.parse
+	 * @param op
+	 * @return
+	 */
+	public static String translateOpToLogicalStatement (String [] op) {
+		
+		String ret = "";
+		ArrayReader reader = new ArrayReader (op);
+		
+		String WHERE = reader.read();
+		assert WHERE.equals("WHERE") : " An operation must begin with WHERE to be translated to a logical statement.";
+		
+		while (reader.moreOpToRead()) {
+			
+			ret+=reader.read()+reader.read()+reader.read(); //read field,comparator,value
+			
+			//check if there is more to the op.  if this condition holds then the while loop -should- continue
+			if (reader.moreOpToRead()) {
+				String compounder = reader.read();
+				
+				if (compounder.equals("AND")) {
+					ret+="&&";
+				}
+				
+				else if (compounder.equals("OR")) {
+					ret+="%%";
+				}
+				
+				else {
+					throw new IllegalArgumentException("Invalid keyword " + compounder + " read.");
+				}
+				
+			}
+			
 		}
 		
 		return ret;

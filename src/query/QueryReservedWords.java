@@ -11,6 +11,7 @@ public class QueryReservedWords {
 	private static final String FROM = "FROM";
 	private static final String AND = "AND";
 	private static final String OR = "OR";
+	private static final String ALL = "ALL";
 	
 	public static boolean isSelect (String check) {
 		return check.equals(SELECT);
@@ -38,6 +39,10 @@ public class QueryReservedWords {
 	
 	public static boolean isOr (String check) {
 		return check.equals(OR);
+	}
+	
+	public static boolean isAll (String check) {
+		return check.equals(ALL);
 	}
 	
 }
