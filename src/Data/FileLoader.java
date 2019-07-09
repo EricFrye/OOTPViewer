@@ -14,7 +14,7 @@ public class FileLoader implements Runnable {
 	private Data data;
 	private Map <String, Integer> mappings;
 	private File src;
-	private int entitiesLoaded;
+	private int entitiesLoaded; 
 	
 	/**
 	 * @param src The file that fd will be reading from
@@ -39,7 +39,7 @@ public class FileLoader implements Runnable {
 			line = line.replaceAll("\"\"", " ");
 			line = line.replaceAll("\"", "");
 			String [] toAdd = line.split(",");
-						
+			
 			synchronized (this.data) {
 				data.addEntity(toAdd);
 				entitiesLoaded++;

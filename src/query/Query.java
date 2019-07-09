@@ -1,5 +1,7 @@
 package query;
 
+import java.util.Map;
+
 /***
  * A Query is a logical statement that can be used to lookup inforamtion from the datafiles
  * @author Eric
@@ -65,6 +67,27 @@ public class Query {
 			return false;
 		}
 
+	}
+	
+	public boolean evaluateQuery (Map <String, Integer> mappings, String [] entity) throws Exception {
+		
+		//the field included in the query is invalid
+		if (!mappings.containsKey(field)) {
+			throw new Exception ("The field " + field + " does not exist in this record");
+		}
+		
+		else {
+			
+			String thisVal = entity[mappings.get(field)];
+			
+			if (!comp(thisVal)) {
+				return false;
+			}
+			
+		}
+
+		return true;
+		
 	}
 
 }

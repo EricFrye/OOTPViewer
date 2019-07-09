@@ -17,7 +17,6 @@ public class Operations {
 			return currentTables.get(name);
 		}
 		
-		
 		else {
 
 			Holder newHolder = new Holder ("data", name);

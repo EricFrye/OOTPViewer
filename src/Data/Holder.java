@@ -114,17 +114,29 @@ public class Holder {
 		
 		for (int curDataRow = 0; curDataRow < data.numRows(); curDataRow++) {
 			
-			try {
+			String [] curEntity = this.data.getEntity(curDataRow);
+			boolean pass = true;
+			
+			for (Query curQuery: queries) {
 				
-				String [] ent = data.query(curDataRow, mappings, queries);
+				boolean result = false;
 				
-				if (ent != null) {
-					ret.addEntity(ent);
+				try {
+					 result = curQuery.evaluateQuery(mappings, curEntity);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				//if the condition is false, or there is an exception, then bail
+				if (!result) {
+					pass = false;
+					break;
 				}
 				
 			}
-			catch (Exception e) {
-				return null;
+			
+			if (pass) {
+				ret.addEntity(curEntity);
 			}
 			
 		}
