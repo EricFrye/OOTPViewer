@@ -3,6 +3,9 @@ package Data;
 import java.io.*;
 import java.util.*;
 
+import query.Queries;
+import query.Query;
+
 /**
  * FileLoader concurrently reads the data for a file that has been split up, which is an option in the export menu for OOTP 
  * @author Eric
@@ -15,6 +18,7 @@ public class FileLoader implements Runnable {
 	private Map <String, Integer> mappings;
 	private File src;
 	private int entitiesLoaded; 
+	private Queries queries;
 	
 	/**
 	 * @param src The file that fd will be reading from
@@ -22,11 +26,12 @@ public class FileLoader implements Runnable {
 	 * @param data Reference to Holder.data
 	 * @param mappings Reference to Holder.mappings
 	 */
-	public FileLoader (File src, Scanner fd, Data data, Map <String, Integer> mappings) {
+	public FileLoader (File src, Scanner fd, Data data, Map <String, Integer> mappings, Queries queries) {
 		this.fd = fd;
 		this.data = data;
 		this.mappings = mappings;
 		this.src = src;
+		this.queries = queries;
 	}
 
 	public void run () {
@@ -39,12 +44,18 @@ public class FileLoader implements Runnable {
 			line = line.replaceAll("\"\"", " ");
 			line = line.replaceAll("\"", "");
 			String [] toAdd = line.split(",");
+
+			//check if there is a condition to this load.  if there is check that this entity even passes
+			if (this.queries == null || this.queries.test(this.mappings, toAdd)) {
 			
-			synchronized (this.data) {
-				data.addEntity(toAdd);
-				entitiesLoaded++;
+				synchronized (this.data) {
+					data.addEntity(toAdd);
+					entitiesLoaded++;
+				}
+
 			}
 
+			
 		}
 		
 		System.out.println(String.format("Ending load for %s.", src.getAbsolutePath()));

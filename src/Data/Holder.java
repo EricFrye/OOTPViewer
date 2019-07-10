@@ -3,7 +3,10 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import query.LogicalStatement;
+import query.Operations;
+import query.Queries;
 import query.Query;
+import query.QueryParser;
 import query.QueryResult;
 
 import misc.Utilities;
@@ -55,11 +58,18 @@ public class Holder {
 	
 	/**
 	 * Standard loading function.  All columns are kept
+	 * @param condition The string representation of a query to check against the loaded values. A value of null means there is no condition to check against
 	 */
-	public void loadInfo () throws Exception {
+	public void loadInfo (String condition) throws Exception {
 		
 		List <File> files = findAllFiles();
 		Thread [] workers = new Thread [files.size()];
+		
+		Queries queries = null;
+		
+		if (condition != null) {
+			queries = LogicalStatement.parse(condition);
+		}
 		
 		long startTime = System.currentTimeMillis();
 		
@@ -83,7 +93,7 @@ public class Holder {
 				
 			}
 			
-			FileLoader curWorker = new FileLoader (curFile, curInput, this.data, this.mappings);
+			FileLoader curWorker = new FileLoader (curFile, curInput, this.data, this.mappings, queries);
 			workers[i] = new Thread (curWorker);
 			
 		}
@@ -109,33 +119,14 @@ public class Holder {
 	 */
 	public QueryResult query (String query) {
 		
-		List <Query> queries = LogicalStatement.parse(query);
+		Queries queries = LogicalStatement.parse(query);
 		Data ret = new Data (this.types.length);
 		
 		for (int curDataRow = 0; curDataRow < data.numRows(); curDataRow++) {
 			
 			String [] curEntity = this.data.getEntity(curDataRow);
-			boolean pass = true;
 			
-			for (Query curQuery: queries) {
-				
-				boolean result = false;
-				
-				try {
-					 result = curQuery.evaluateQuery(mappings, curEntity);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
-				//if the condition is false, or there is an exception, then bail
-				if (!result) {
-					pass = false;
-					break;
-				}
-				
-			}
-			
-			if (pass) {
+			if (queries.test(this.mappings, curEntity)) {
 				ret.addEntity(curEntity);
 			}
 			
@@ -447,23 +438,13 @@ public class Holder {
 		
 		String path = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
 		
-		String fileName = "players_career_batting_stats";
-		String fileName1 = "players";
-		String fileName2 = "teams";
+		String command = "FROM players_career_batting_stats SELECT ALL WHERE player_id = 13";
 		
-		Holder playersStats = new Holder(path, fileName);
-		Holder players = new Holder(path, fileName1);
-		Holder teams = new Holder(path, fileName2);
+		QueryParser parser = new QueryParser ();
+		Map <String, Holder> scope = new HashMap <String, Holder> ();
 		
-		try {
-			playersStats.loadInfo();
-			players.loadInfo();
-			teams.loadInfo();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		String [] out = players.createNewOrderedFields(playersStats);
+		Holder res = scope.get(Operations.performOps(parser.parseQuery(command), scope));
+		System.out.println(res);
 		
 	}
 	

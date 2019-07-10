@@ -14,7 +14,7 @@ import Data.Type;
  */
 public class QueryResult extends Holder{
 	
-	private List <Query> query;
+	private Queries query;
 
 	/**
 	 * 
@@ -23,7 +23,7 @@ public class QueryResult extends Holder{
 	 * @param mappings The string to index mappings for the fields
 	 * @param types Array containing the types of the fields
 	 */
-	public QueryResult (Data result, List <Query> query, Map <String, Integer> mappings, Type [] types) {
+	public QueryResult (Data result, Queries query, Map <String, Integer> mappings, Type [] types) {
 		
 		super(mappings, result, types);
 		this.query = query;

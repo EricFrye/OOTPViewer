@@ -16,7 +16,7 @@ public class LogicalStatement {
 	 * @param line regex string of the form ((\w+)(=|>|>=|<|<=)(\w+)(&&|%%))*(\w+)(=|>|>=|<|<=)(\w+) where %% corresponds to logical OR
 	 * @return List of queries corresponding to the regex line
 	 */
-	public static List <Query> parse (String line) {
+	public static Queries parse (String line) {
 		
 		List <Query> ret = new LinkedList <Query> ();
 		String pattern = "(\\w+)(=|>|>=|<|<=)(\\w+)(&&|%%)*";
@@ -33,7 +33,7 @@ public class LogicalStatement {
 				
 		}
 		
-		return ret;
+		return new Queries (ret);
 		
 	}
 	
@@ -80,7 +80,7 @@ public class LogicalStatement {
 	
 	public static void main (String [] args) {
 		
-		List <Query> query = LogicalStatement.parse("player_id>=1234s&&team_id<=12312");
+		Queries query = LogicalStatement.parse("player_id>=1234s&&team_id<=12312");
 		System.out.println(query);
 		
 		

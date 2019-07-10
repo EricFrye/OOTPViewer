@@ -12,17 +12,18 @@ public class Operations {
 	
 	private static Holder from (String name, Map <String, Holder> currentTables) {
 		
-		//we are working with a table 
+		//we are working with an existing table 
 		if (currentTables.containsKey(name)) {
 			return currentTables.get(name);
 		}
 		
+		//loading from stored data
 		else {
 
 			Holder newHolder = new Holder ("data", name);
 			
 			try {
-				newHolder.loadInfo();
+				newHolder.loadInfo(null);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -117,6 +118,7 @@ public class Operations {
 		}
 		
 		currentTables.put(name, holderToRet);
+			
 		return name;
 		
 	}
