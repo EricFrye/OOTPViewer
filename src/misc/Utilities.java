@@ -258,4 +258,48 @@ public class Utilities {
 		
 	}
 	
+	public static int [] backwardsSpaceIndex (String str, int start) {
+		
+		if (start < 0 || start >= str.length()) {
+			return null;
+		}
+		
+		else {
+			
+			int curIndex = start;
+			
+			//consume as many ending spaces as possible 
+			while (curIndex >= 0 && str.charAt(curIndex) == ' ') {
+				curIndex--;
+			}
+			
+			int endIndex = curIndex+1;
+			
+			//consume characters until a space, indicative of the end of the parse, is read
+			while (curIndex >= 0 && str.charAt(curIndex) != ' ') {
+				curIndex--;
+			}
+			
+			return new int [] {curIndex+1,endIndex};
+			
+		}
+		
+	}
+	
+	public static boolean shouldSwap (String left, String right, boolean isAsc, boolean nonString) {
+		
+		boolean result;
+		
+		if (nonString) {
+			result = left.compareTo(right) > 0;
+		}
+		
+		else {
+			result = Double.parseDouble(left) > Double.parseDouble(right);
+		}
+		
+		return isAsc ? result : !result;
+		
+	}
+	
 }

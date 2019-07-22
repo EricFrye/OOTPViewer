@@ -434,17 +434,23 @@ public class Holder {
 		return data.lengthOfLongestEntry(col);
 	}
 	
+	public void sort (String fieldOn, boolean isAsc) {
+		this.data.sortData(fieldOn, this.mappings, this.types, isAsc);
+	}
+	
 	public static void main (String [] args) {
 		
 		String path = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
 		
-		String command = "FROM players_career_batting_stats SELECT ALL WHERE player_id = 13";
+		String command = "FROM players SELECT ALL";
 		
 		QueryParser parser = new QueryParser ();
 		Map <String, Holder> scope = new HashMap <String, Holder> ();
 		
 		Holder res = scope.get(Operations.performOps(parser.parseQuery(command), scope));
-		System.out.println(res);
+		System.out.println(res.mappings.toString());
+		
+		res.data.sortData("last_name", res.mappings, res.types, true);
 		
 	}
 	

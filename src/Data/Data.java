@@ -3,6 +3,7 @@ package Data;
 import java.util.List;
 import java.util.Map;
 
+import misc.Utilities;
 import query.Query;
 
 public class Data {
@@ -203,6 +204,55 @@ public class Data {
 		}
 		
 		return max;
+		
+	}
+	
+	/**
+	 * Performs a sort on a single field
+	 * @param fieldOn
+	 * @param isDesc
+	 */
+	public void sortData (String fieldOn, Map <String, Integer> mappings, Type [] types, boolean isAsc) {
+		sortHelper(fieldOn, mappings, types, 0, this.numRows-1, isAsc);
+	}
+	
+	private void sortHelper (String fieldOn, Map <String, Integer> mappings, Type [] types, int low, int high, boolean isAsc) {
+		
+		if (low < high) {
+			
+			int partIndex = partition(fieldOn, mappings, types, low, high, isAsc);
+			sortHelper(fieldOn, mappings, types, low, partIndex-1, isAsc);
+			sortHelper(fieldOn, mappings, types, partIndex+1, high, isAsc);
+			
+		}
+		
+	}
+	
+	private int partition (String fieldOn, Map <String, Integer> mappings, Type [] types, int low, int high, boolean isAsc) {
+		
+		int i = low-1;
+		
+		for (int j = low; j < high; j++) {
+			
+			int colIndex = mappings.get(fieldOn);
+			
+			if (Utilities.shouldSwap(this.data[high][colIndex], this.data[j][colIndex], isAsc, types[colIndex].equals(Type.convert("S")))) {
+				
+				i++;
+				
+				String [] temp = this.data[i];
+				this.data[i] = this.data[j];
+				this.data[j] = temp;
+				
+			}
+			
+		}
+		
+		String [] temp = this.data[i+1];
+		this.data[i+1] = this.data[high];
+		this.data[high] = temp;
+		
+		return i+1;
 		
 	}
 	
