@@ -35,7 +35,6 @@ public class QueryParser {
 		}
 		catch (ParseException e) {
 			this.error = e;
-			e.printStackTrace();
 			return null;
 		}
 		

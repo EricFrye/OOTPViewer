@@ -25,15 +25,15 @@ public class HolderTable extends JTable {
 		
 		String [] colNames = table.mappings();
 		int numEntries = table.numEntities(); 
-		int numExtraRows = 1; //summarization row
-		int numHeaderRows = 1;
-		Object [][] data = new Object [numEntries+numExtraRows][colNames.length];
+		//int numExtraRows = 1; //summarization row
+		//int numHeaderRows = 1;
+		Object [][] data = new Object [numEntries][colNames.length];
 		
 		for (int dataIndex = 0; dataIndex < numEntries; dataIndex++) {
 			data[dataIndex] = table.getEntityVal(dataIndex);
 		}
 		
-		data[numEntries] = table.summarize(fieldsSummarize);
+		//data[numEntries] = table.summarize(fieldsSummarize);
 		
 		HolderTable ret = new HolderTable (data, colNames);
 		ret.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);

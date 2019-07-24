@@ -14,7 +14,7 @@ import query.*;
 public class driver {
 	
 	public static void main (String [] args) {
-				
+		
 		//JFrame view = new JFrame ("Player View");
 		//view.setVisible(true);
 		
