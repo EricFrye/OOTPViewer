@@ -30,10 +30,15 @@ public class QueryResult extends Holder{
 		
 	}
 	
+	public QueryResult (String path, String file) {
+		super(path,file);
+	}
+	
 	/**
 	 * Gets the first result found for this query
 	 * @return null if nothing found, otherwise the first Entity.  This is a copy of the Entity, not a reference
 	 */
+
 	public String [] getTop () {
 		return super.getTop();
 	}
@@ -50,5 +55,33 @@ public class QueryResult extends Holder{
 		return top == null ? "NaN (No Result)" : top[(this.mappings.get(field))];
 		
 	}	
+	
+	/**
+	 * Get a single value from a table
+	 * @param path
+	 * @param file
+	 * @param field
+	 * @param loadCondition
+	 * @return
+	 */
+	public static String getTopField (String path, String file, String field, String loadCondition) {
+		
+		Holder table = new QueryResult (path, file);
+		
+		try {
+			table.loadInfo(loadCondition);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return ((QueryResult)table).getTopField(field);
+		
+	}
+	
+	public static void main (String [] args) {
+		
+		System.out.println(QueryResult.getTopField("data", "teams", "team_id", "name=Philadelphia"));
+		
+	}
 	
 }
