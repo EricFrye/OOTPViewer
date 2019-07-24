@@ -2,9 +2,10 @@ package misc;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.io.*;
 
-import Data.Type;
+import data.Type;
+
+import java.io.*;
 
 public class Utilities {
 	

@@ -2,7 +2,7 @@ package UI;
 
 import javax.swing.*;
 
-import Data.*;
+import data.*;
 
 /**
  * UI component that loads the info contained in a Holder into a JTable display

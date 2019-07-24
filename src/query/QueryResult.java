@@ -2,10 +2,10 @@ package query;
 
 import java.util.*;
 
-import Data.Data;
-import Data.Entity;
-import Data.Holder;
-import Data.Type;
+import data.Data;
+import data.Entity;
+import data.Holder;
+import data.Type;
 
 /**
  * QueryResult contains the results of a query and any data related to this said data

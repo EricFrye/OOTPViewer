@@ -5,10 +5,10 @@ import java.util.*;
 
 import javax.swing.*;
 
-import Data.Holder;
 import UI.HolderTable;
 import UI.MainFrame;
 import UI.QueryUI;
+import data.Holder;
 import query.*;
 
 public class driver {

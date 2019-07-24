@@ -13,7 +13,7 @@ import javax.swing.JTextPane;
 
 import org.jsoup.Jsoup;
 
-import Data.Holder;
+import data.Holder;
 import misc.Utilities;
 import query.Operations;
 import query.QueryParser;
