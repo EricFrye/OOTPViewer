@@ -259,6 +259,12 @@ public class Utilities {
 		
 	}
 	
+	/**
+	 * Finds the highest index that is less than start which is a space character.  Ignores leading spaces
+	 * @param str
+	 * @param start
+	 * @return
+	 */
 	public static int [] backwardsSpaceIndex (String str, int start) {
 		
 		if (start < 0 || start >= str.length()) {

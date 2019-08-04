@@ -3,11 +3,11 @@ package query;
 import java.util.LinkedList;
 import java.util.List;
 
+import misc.StringWrapper;
 import misc.Utilities;
 
 public class QueryParser {
 	
-	private static QueryReservedWords reservedWords = new QueryReservedWords ();
 	private static final char none = (char)0;
 	private int charsRead;
 	private List <String []> ops;
@@ -15,9 +15,14 @@ public class QueryParser {
 	private String lastQueryString;
 	
 	public QueryParser () {
-		this.ops = new LinkedList <String []> ();
+		reset();
+	}
+	
+	private void reset () {
 		this.charsRead = 0;
+		this.ops = new LinkedList <String []> ();
 		this.error = null;
+		this.lastQueryString = null;
 	}
 	
 	public ParseException getError () {
@@ -28,6 +33,8 @@ public class QueryParser {
 	 * Parse user input into a List of of String arrays that can be used to fulfill the query string
 	 */
 	public List <String []> parseQuery (String str) {
+		
+		reset();
 		
 		try {
 			this.lastQueryString = str;
@@ -319,7 +326,7 @@ public class QueryParser {
 		return new Object [] {ret, curToParseIndex+1, this.charsRead};
 		
 	}
-	
+
 	public static void main (String [] args) {
 		
 		String toParse = "FROM teams JOIN team_history_record ON = team_id SELCT ALL WHERE team_id >= 0 AND hr > 10";

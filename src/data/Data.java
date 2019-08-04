@@ -3,8 +3,8 @@ package data;
 import java.util.List;
 import java.util.Map;
 
+import boolean_logic.Query;
 import misc.Utilities;
-import query.Query;
 
 public class Data {
 	

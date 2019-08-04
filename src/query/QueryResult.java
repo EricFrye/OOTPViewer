@@ -77,6 +77,7 @@ public class QueryResult extends Holder{
 		return ((QueryResult)table).getTopField(field);
 		
 	}
+
 	
 	public static void main (String [] args) {
 		

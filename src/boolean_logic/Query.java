@@ -1,13 +1,15 @@
-package query;
+package boolean_logic;
 
 import java.util.Map;
+
+import query.Comparer;
 
 /***
  * A Query is a logical statement that can be used to lookup inforamtion from the datafiles
  * @author Eric
  *
  */
-public class Query {
+public class Query implements QuantifierObject{
 
 	private String field;
 	private Comparer comp;

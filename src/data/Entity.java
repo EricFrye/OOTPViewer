@@ -1,7 +1,7 @@
 package data;
 import java.util.*;
 
-import query.Query;
+import boolean_logic.Query;
 
 /***
  * A single line from a data file.  An Entity cannot be interpreted outside of the Holder that it belongs to as it does not have the data mappings 

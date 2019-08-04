@@ -3,6 +3,8 @@ package query;
 import java.util.List;
 import java.util.Map;
 
+import boolean_logic.Query;
+
 public class Queries {
 
 	private List <Query> queries;

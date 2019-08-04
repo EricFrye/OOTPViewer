@@ -2,6 +2,7 @@ package query;
 import java.util.*;
 import java.util.regex.*;
 
+import boolean_logic.Query;
 import misc.ArrayReader;
 
 /***

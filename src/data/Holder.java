@@ -2,10 +2,10 @@ package data;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import boolean_logic.Query;
 import query.LogicalStatement;
 import query.Operations;
 import query.Queries;
-import query.Query;
 import query.QueryParser;
 import query.QueryResult;
 

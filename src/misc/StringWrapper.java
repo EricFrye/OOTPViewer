@@ -1,4 +1,4 @@
-package query;
+package misc;
 
 //a work around to allow strings to be passed by reference
 public class StringWrapper {

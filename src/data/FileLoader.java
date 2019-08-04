@@ -3,8 +3,8 @@ package data;
 import java.io.*;
 import java.util.*;
 
+import boolean_logic.Query;
 import query.Queries;
-import query.Query;
 
 /**
  * FileLoader concurrently reads the data for a file that has been split up, which is an option in the export menu for OOTP 
