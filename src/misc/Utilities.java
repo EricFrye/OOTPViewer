@@ -309,4 +309,12 @@ public class Utilities {
 		
 	}
 	
+	public static String createPathString (String...strings ) {
+		
+		String joiner = "\\";
+		
+		return String.join(joiner, strings);
+		
+	}
+	
 }
