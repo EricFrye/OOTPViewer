@@ -1,17 +1,20 @@
 package data;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.io.File;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
-import boolean_logic.Query;
+import javax.activation.UnsupportedDataTypeException;
+
+import boolean_logic.Quantifier;
+import misc.Utilities;
 import query.LogicalStatement;
 import query.Operations;
 import query.Queries;
 import query.QueryParser;
 import query.QueryResult;
-
-import misc.Utilities;
-
-import java.io.*;
 
 /***
  * InfoHolder is the main mechanism for loading and accessing the data files
@@ -65,10 +68,10 @@ public class Holder {
 		List <File> files = findAllFiles();
 		Thread [] workers = new Thread [files.size()];
 		
-		Queries queries = null;
+		Quantifier queries = new Quantifier();
 		
 		if (condition != null) {
-			queries = LogicalStatement.parse(condition);
+			queries.parseQuantifier(condition);
 		}
 		
 		long startTime = System.currentTimeMillis();
@@ -119,7 +122,9 @@ public class Holder {
 	 */
 	public QueryResult query (String query) {
 		
-		Queries queries = LogicalStatement.parse(query);
+		Quantifier queries = new Quantifier (); 
+		queries.parseQuantifier(query);
+		
 		Data ret = new Data (this.types.length);
 		
 		for (int curDataRow = 0; curDataRow < data.numRows(); curDataRow++) {
@@ -225,7 +230,6 @@ public class Holder {
 	public boolean containsField (String curField) {
 		return this.mappings.containsKey(curField);
 	}
-	
 	
 	/**
 	 * 

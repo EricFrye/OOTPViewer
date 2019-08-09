@@ -136,7 +136,7 @@ public class Quantifier implements QuantifierObject {
 		return (check >= 'a' && check <= 'z') || (check >= 'A' && check <= 'Z') || (check >= '0' && check <= '9') || check == '_';
 	}
 	
-	public boolean test (Map <String, Integer> mappings, String [] ent) throws UnsupportedDataTypeException {
+	public boolean test (Map <String, Integer> mappings, String [] ent) {
 		
 		boolean result = true; //we will assume true until we find otherwise
 		
@@ -182,7 +182,7 @@ public class Quantifier implements QuantifierObject {
 				}
 				
 				else {
-					throw new IllegalStateException ();
+					return false;
 				}
 				
 				curResult = not ? !curResult : curResult; //flip if the not bit is flipped
@@ -228,6 +228,10 @@ public class Quantifier implements QuantifierObject {
 		
 	}
 	
+	public boolean isParsed () {
+		return !this.components.isEmpty();
+	}
+	
 	public static void main (String [] args) {
 		
 		String str = "c > 3 AND (a=8 OR b=9)";
@@ -242,11 +246,7 @@ public class Quantifier implements QuantifierObject {
 		q.parseQuantifier(str);
 		System.out.println(q);
 		
-		try {
-			System.out.println(q.test(mappings, ent));
-		} catch (UnsupportedDataTypeException e) {
-			e.printStackTrace();
-		}
+		System.out.println(q.test(mappings, ent));
 		
 	}
 	

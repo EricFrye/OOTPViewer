@@ -1,9 +1,9 @@
 package query;
 
-import java.util.*;
+import java.util.Map;
 
+import boolean_logic.Quantifier;
 import data.Data;
-import data.Entity;
 import data.Holder;
 import data.Type;
 
@@ -14,7 +14,7 @@ import data.Type;
  */
 public class QueryResult extends Holder{
 	
-	private Queries query;
+	private Quantifier query;
 
 	/**
 	 * 
@@ -23,7 +23,7 @@ public class QueryResult extends Holder{
 	 * @param mappings The string to index mappings for the fields
 	 * @param types Array containing the types of the fields
 	 */
-	public QueryResult (Data result, Queries query, Map <String, Integer> mappings, Type [] types) {
+	public QueryResult (Data result, Quantifier query, Map <String, Integer> mappings, Type [] types) {
 		
 		super(mappings, result, types);
 		this.query = query;
