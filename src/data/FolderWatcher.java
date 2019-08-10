@@ -5,27 +5,33 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-
-import misc.Utilities;
 
 public class FolderWatcher implements Runnable {
 	
 	private WatchService watcher;
 	private WatchKey key;
-	private Path writeTo;
-	private Path readFrom;
 	
-	public FolderWatcher (String fromDir, String toDir) {
+	private Path rootWriteTo; //the folder that folder folderName will be created in
+	private Path writeTo; //the folder that exported files from OOTP should be written to.  rootWriteTo/folderName
+	private Path readFrom; //the folder the OOTP will export the files to
+	private Long folderName; //the folder name in root to differentiate exports
+	private Long lastUpdateTime; //time in nano seconds when the last update occured
+	
+	private final Long timeToNeedNewFolder = (long) (10*Math.pow(10.0, 9.0));//how much time is allowed until a export goes to a new folder
+	
+	public FolderWatcher (String fromDir, String rootWriteTo) {
 		
 		this.readFrom = Paths.get(fromDir);
-		this.writeTo = Paths.get(toDir);
+		this.rootWriteTo = Paths.get(rootWriteTo);
 		
 		try {
 			this.watcher = FileSystems.getDefault().newWatchService();
@@ -42,14 +48,24 @@ public class FolderWatcher implements Runnable {
 			
 			WatchKey key = null;
 			
+			//get the current batch of file changes
 			try {
 				key = this.watcher.take();
 			} catch (InterruptedException i) {
 				i.printStackTrace();
 			}
 			
-			if (key != null) {
+			//update the folder to write to if it is appropriate
+			if (this.folderName == null || System.nanoTime() - this.lastUpdateTime >= timeToNeedNewFolder) {
+				
+				this.folderName = System.nanoTime();
+				this.writeTo =  this.rootWriteTo.resolve(this.folderName + "");
+				this.writeTo.toFile().mkdir();
+				
+			}
 			
+			if (key != null) {
+				
 				for (WatchEvent <?> event: key.pollEvents()) {
 					
 					WatchEvent.Kind <?> kind = event.kind();
@@ -57,20 +73,15 @@ public class FolderWatcher implements Runnable {
 					if (kind == ENTRY_CREATE || kind == ENTRY_MODIFY) {
 						
 						Path fileName = ((WatchEvent<Path>)event).context();
-						
-						String folderName = System.nanoTime() + "";
-						String newFolder = Utilities.createPathString(this.writeTo.toString(), folderName);
-						Path newFolderPath = Paths.get(newFolder);
-						new File(newFolderPath.toString()).mkdir();
-						
 						Path resolvedFile = readFrom.resolve(fileName);
-						Path newFile = newFolderPath.resolve(fileName);
 						
 						try {
-							Files.copy(resolvedFile, newFile);
+							Files.copy(resolvedFile, this.writeTo.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
+						
+						this.lastUpdateTime = System.nanoTime();
 						
 					}
 					

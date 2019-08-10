@@ -35,7 +35,7 @@ public class FileLooker {
 			else {
 				
 				if (cur.getName().matches(pattern)) {
-					toRet.add(Paths.get(dir.toString(), fileName).toFile());
+					toRet.add(Paths.get(dir.toString(), cur.getName()).toFile());
 				}
 				
 			}
