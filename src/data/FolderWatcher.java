@@ -98,9 +98,76 @@ public class FolderWatcher implements Runnable {
 		
 	}
 	
+	/**
+	 * Moves any yearly dump folders that are not yet located in the given folder there
+	 */
+	public static void copy (Path from, Path to) {
+		
+		File [] curFolders = to.toFile().listFiles();
+		
+		for (File curToCopy: from.toFile().listFiles()) {
+			
+			if (curToCopy.isDirectory()) {
+			
+				String [] fileNameSpl = curToCopy.getName().split("_");
+				
+				//make sure there is something to read
+				if (fileNameSpl.length > 1) {
+					
+					boolean folderExists = false;
+
+						//we need to check if this folder already exists
+						for (File curFolderCheck: curFolders) {
+							
+							if (curFolderCheck.getName().contains(fileNameSpl[1])) {
+								
+								folderExists = true;
+								break;
+								
+							}
+							
+						}
+						
+					
+					
+					if (!folderExists) {
+						
+						//get to the root of the file we wish to copy
+						Path folderToCopy = from.resolve(curToCopy.getName());
+						folderToCopy = folderToCopy.resolve("csv");
+						
+						Path newFolder = to.resolve(curToCopy.getName());
+						
+						try {
+						
+							Files.copy(folderToCopy.toFile().toPath(), newFolder.toFile().toPath());
+						
+							for (File curDataFile: folderToCopy.toFile().listFiles()) {
+								Files.copy(curDataFile.toPath(), newFolder.resolve(curDataFile.getName()));
+							}
+							
+						
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						//System.out.println(folderToCopy.toFile().renameTo(newFolder.toFile()));
+						
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+	}
+	
 	public static void main (String [] args) {
 		
-		new FolderWatcher ("C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv","data").run();
+		FolderWatcher.copy(Paths.get("C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 2.lg\\dump"), Paths.get("D:\\Java_Projects\\OOTPViewer\\data"));
+		//new FolderWatcher ("C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 2.lg\\dump\\dump_2019_yearly\\csv","data").run();
 		
 	}
 	
