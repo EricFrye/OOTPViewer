@@ -5,14 +5,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-
-import javax.activation.UnsupportedDataTypeException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import boolean_logic.Quantifier;
 import misc.Utilities;
-import query.LogicalStatement;
 import query.Operations;
-import query.Queries;
 import query.QueryParser;
 import query.QueryResult;
 
@@ -65,7 +63,7 @@ public class Holder {
 	 */
 	public void loadInfo (String condition) throws Exception {
 		
-		List <File> files = findAllFiles();
+		List <File> files = FileLooker.findFiles(this.fileName, new File(this.directoryPath));
 		Thread [] workers = new Thread [files.size()];
 		
 		Quantifier queries = new Quantifier();
@@ -74,7 +72,7 @@ public class Holder {
 			queries.parseQuantifier(condition);
 		}
 		
-		long startTime = System.currentTimeMillis();
+		ExecutorService pool = Executors.newFixedThreadPool(8);
 		
 		for (int i = 0; i < files.size(); i++) {
 			
@@ -96,22 +94,12 @@ public class Holder {
 				
 			}
 			
-			FileLoader curWorker = new FileLoader (curFile, curInput, this.data, this.mappings, queries);
-			workers[i] = new Thread (curWorker);
+			Runnable curWorker = new FileLoader (curFile, curInput, this.data, this.mappings, queries);
+			pool.execute(curWorker);
 			
 		}
 		
-		
-		for (Thread curWorker: workers) {
-			curWorker.start();
-		}
-
-		for (Thread curWorker: workers) {
-			curWorker.join();
-		}
-		
-		
-		System.out.println(String.format("Run time for loading %s was %f seconds.", this.fileName, (System.currentTimeMillis()-startTime)/1000.0));
+		pool.shutdown();
 
 	}
 	
@@ -438,23 +426,25 @@ public class Holder {
 		return data.lengthOfLongestEntry(col);
 	}
 	
-	public void sort (String fieldOn, boolean isAsc) {
+	public void sort (String [] fieldOn, boolean isAsc) {
 		this.data.sortData(fieldOn, this.mappings, this.types, isAsc);
 	}
 	
 	public static void main (String [] args) {
 		
-		String path = "C:\\Users\\Eric\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game 3.lg\\import_export\\csv";
+		String path = "D:\\Java_Projects\\OOTPViewer\\data";
+		String command = "players_game_batting";
 		
-		String command = "FROM players SELECT ALL";
+		Holder game_logs = new Holder (path, command);
 		
-		QueryParser parser = new QueryParser ();
-		Map <String, Holder> scope = new HashMap <String, Holder> ();
+		try {
+			game_logs.loadInfo("player_id = 14");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		Holder res = scope.get(Operations.performOps(parser.parseQuery(command), scope));
-		System.out.println(res.mappings.toString());
-		
-		res.data.sortData("last_name", res.mappings, res.types, true);
+		game_logs.sort(new String [] {"year", "game_id"}, true);
 		
 	}
 	

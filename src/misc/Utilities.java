@@ -309,6 +309,21 @@ public class Utilities {
 		
 	}
 	
+	public static int compareTo (String left, String right, boolean nonString) {
+		
+		if (nonString) {
+			return left.compareTo(right);
+		}
+		
+		else {
+			
+			double res = Double.parseDouble(left) - Double.parseDouble(right);
+			return res == 0 ? 0 : res > 0 ? 1 : -1;
+			
+		}
+		
+	}
+	
 	public static String createPathString (String...strings ) {
 		
 		String joiner = "\\";

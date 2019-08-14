@@ -212,11 +212,11 @@ public class Data {
 	 * @param fieldOn
 	 * @param isDesc
 	 */
-	public void sortData (String fieldOn, Map <String, Integer> mappings, Type [] types, boolean isAsc) {
+	public void sortData (String [] fieldOn, Map <String, Integer> mappings, Type [] types, boolean isAsc) {
 		sortHelper(fieldOn, mappings, types, 0, this.numRows-1, isAsc);
 	}
 	
-	private void sortHelper (String fieldOn, Map <String, Integer> mappings, Type [] types, int low, int high, boolean isAsc) {
+	private void sortHelper (String [] fieldOn, Map <String, Integer> mappings, Type [] types, int low, int high, boolean isAsc) {
 		
 		if (low < high) {
 			
@@ -228,21 +228,42 @@ public class Data {
 		
 	}
 	
-	private int partition (String fieldOn, Map <String, Integer> mappings, Type [] types, int low, int high, boolean isAsc) {
+	private int partition (String [] fieldOn, Map <String, Integer> mappings, Type [] types, int low, int high, boolean isAsc) {
 		
 		int i = low-1;
 		
 		for (int j = low; j < high; j++) {
 			
-			int colIndex = mappings.get(fieldOn);
-			
-			if (Utilities.shouldSwap(this.data[high][colIndex], this.data[j][colIndex], isAsc, types[colIndex].equals(Type.convert("S")))) {
+			for (String curFieldOn: fieldOn) {
 				
-				i++;
+				int colIndex = mappings.get(curFieldOn);
 				
-				String [] temp = this.data[i];
-				this.data[i] = this.data[j];
-				this.data[j] = temp;
+				int swapCheck = Utilities.compareTo(this.data[high][colIndex], this.data[j][colIndex], types[colIndex].equals(Type.convert("S")));
+				
+				//this field was inconclusive - we need to go to the next iteration to check
+				if (swapCheck == 0) {
+					continue;
+				}
+				
+				//otherwise we have a decision, swap if needed and break to avoid checking lower valued comps
+				else {
+					
+					boolean needToSwap = swapCheck > 0;
+					needToSwap = isAsc ? needToSwap : !needToSwap;
+					
+					if (needToSwap) {
+						
+						i++;
+						
+						String [] temp = this.data[i];
+						this.data[i] = this.data[j];
+						this.data[j] = temp;
+						
+					}
+					
+					break;
+					
+				}
 				
 			}
 			
