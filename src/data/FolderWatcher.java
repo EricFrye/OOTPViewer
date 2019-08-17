@@ -136,12 +136,14 @@ public class FolderWatcher implements Runnable {
 						Path folderToCopy = from.resolve(curToCopy.getName());
 						folderToCopy = folderToCopy.resolve("csv");
 						
+						//path the to folder to use the same name as the source
 						Path newFolder = to.resolve(curToCopy.getName());
 						
 						try {
 						
 							Files.copy(folderToCopy.toFile().toPath(), newFolder.toFile().toPath());
 						
+							//copy the actual csv files
 							for (File curDataFile: folderToCopy.toFile().listFiles()) {
 								Files.copy(curDataFile.toPath(), newFolder.resolve(curDataFile.getName()));
 							}
