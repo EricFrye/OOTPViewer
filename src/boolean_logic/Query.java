@@ -46,8 +46,8 @@ public class Query implements QuantifierObject{
 			return otherValue.equals(value);
 		}
 		
-		int valueInt = Integer.parseInt(value);
-		int otherValueInt = Integer.parseInt(otherValue);
+		double valueInt = Double.parseDouble(value);
+		double otherValueInt = Double.parseDouble(otherValue);
 
 		if (this.comp.equals(Comparer.LT)) {
 			return otherValueInt < valueInt; 

@@ -159,6 +159,18 @@ public class Utilities {
 		
 	}
 	
+	public static Double [][] growMatrix (Double [][] cur) {
+		
+		Double [][] ret = new Double [cur.length*2][];
+		
+		for (int curRowIndex = 0; curRowIndex < cur.length; curRowIndex++) {
+			ret[curRowIndex] = cur[curRowIndex];
+		}
+		
+		return ret;
+		
+	}
+	
 	/**
 	 * @param cur
 	 * @return cur doubled in size

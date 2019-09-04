@@ -6,30 +6,48 @@ import query.QueryResult;
 
 public class Reports {
 	
-	public static Map <String, Object> teamRecordReport (String city, String nickname) {
+	public static Double [][] playerHittingStreak (String first, String last) {
 		
-		String teamLoadCondition = String.format("name=%s&&nickname=%s", city, nickname);
-		String teamID = QueryResult.getTopField("data", "teams", "team_id", teamLoadCondition);
+		String players = String.format("first_name=%s AND last_name=%s", first, last);
+		String playerID = QueryResult.getTopField("data", "players", "player_id", players);
 		
-		String games = String.format("home_team=%s%%away_team=%s", teamID, teamID);
+		String games = String.format("player_id=%s", playerID);
 		
-		Holder result = new Holder ("data", "games");
+		Holder result = new Holder ("data", "players_game_batting");
+		
 		try {
 			result.loadInfo(games);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		result = result.select("game_id,home_team,away_team,runs0,runs1,hits0,hits1,errors0,errors1");
-		result.sort("game", true);
 		
-		return null;
+		Streak streak = new Streak (result.mappings,"h,k,d,t,hr,r,rbi,sb,bb,wpa".split(","), "Length", "k >= 1");
+		result.processStreak(streak);
+		
+		return streak.getStreakStats();
 		
 	}
 	
 	public static void main (String [] args) {
 		
-		teamRecordReport("Philadelphia", "Sabres");
+		Double [][] result = playerHittingStreak("Mark","Silfies");
+		
+		for (String cur: "h,k,d,t,hr,r,rbi,sb,bb,wpa".split(",")) {
+			System.out.print(String.format("%4s", cur) + " ");
+		}
+		
+		System.out.println();
+		
+		for (int i = 0; i < result.length; i++) {
+			
+			for (int j = 0; j < result[0].length; j++) {
+				System.out.print(String.format("%1.2f", result[i][j]) + " ");
+			}
+			
+			System.out.println("\n");
+			
+		}
 		
 	}
 	

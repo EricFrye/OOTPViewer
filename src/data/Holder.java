@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import boolean_logic.Quantifier;
 import misc.Utilities;
@@ -100,6 +101,7 @@ public class Holder {
 		}
 		
 		pool.shutdown();
+		pool.awaitTermination(1000, TimeUnit.SECONDS);
 
 	}
 	
@@ -428,6 +430,43 @@ public class Holder {
 	
 	public void sort (String [] fieldOn, boolean isAsc) {
 		this.data.sortData(fieldOn, this.mappings, this.types, isAsc);
+	}
+	
+	public String [] getAllValues (String field) {
+		
+		if (!this.mappings.containsKey(field)) {
+			return null;
+		}
+		
+		else {
+			
+			String [] valsToRet = new String [this.data.numCols()]; 
+			int fieldIndex = this.mappings.get(field);
+			
+			for (int curEntIndex = 0; curEntIndex < this.data.numCols(); curEntIndex++) {
+				valsToRet[curEntIndex] = this.data.getEntity(curEntIndex)[fieldIndex];
+			}
+			
+			return valsToRet;
+			
+		}
+		
+	}
+	
+	public Streak processStreak (Streak strk) {
+		
+		this.sort(new String []{"year","game_id"}, true);
+		
+		for (int curEntIndex = 0; curEntIndex < this.data.numRows(); curEntIndex++) {
+			
+			String [] curEnt = this.data.getEntity(curEntIndex);
+			strk.handleEntity(curEnt);
+			
+		}
+		
+		strk.end();
+		return strk;
+		
 	}
 	
 	public static void main (String [] args) {
