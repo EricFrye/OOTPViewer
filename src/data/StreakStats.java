@@ -12,7 +12,7 @@ public class StreakStats {
 	public StreakStats (int numFields, Integer numRows) {
 		
 		this.numRows = 0;
-		this.stats = new Double [numFields+1][numRows == null ? 10 : numRows];
+		this.stats = new Double [numRows == null ? 10 : numRows][numFields];
 	
 	}
 
@@ -20,10 +20,15 @@ public class StreakStats {
 	 * Mimics the structure for the stats matrix but doesn't copy the stats
 	 * @param sample
 	 */
-	public StreakStats (StreakStats sample) {
+	public StreakStats (StreakStats sample, boolean copyValues) {
 		
 		this.numRows = 0;
 		this.stats = new Double [sample.sizeStats()][sample.numFields()];
+		
+		if (copyValues) {
+			this.stats = sample.stats.clone();
+			this.numRows = sample.length();
+		}
 		
 	}
 	
@@ -76,13 +81,19 @@ public class StreakStats {
 	 * @param mappings
 	 * @param addPolicy Potential values - Length,Amount
 	 */
-	public void addStats (String [] entToAdd, String [] fields, Map <String, Integer> mappings, StreakAddPolicy addPolicy) {
+	public void addStats (String [] entToAdd, String [] fields, Map <String, Integer> mappings, StreakAddPolicy addPolicy, String [] identityFields) {
 
 		//build the stat row that will be added
-		Double [] newStats = new Double [fields.length];
+		Double [] newStats = new Double [fields.length + identityFields.length];
 		
-		for (int curFieldIndex = 0; curFieldIndex < newStats.length; curFieldIndex++) {
-			newStats[curFieldIndex] = Double.parseDouble(entToAdd[mappings.get(fields[curFieldIndex])]);
+		//add the identity fields to the front
+		for (int curIdentityFieldIndex = 0; curIdentityFieldIndex < identityFields.length; curIdentityFieldIndex++) {
+			newStats[curIdentityFieldIndex] = Double.parseDouble(entToAdd[mappings.get(identityFields[curIdentityFieldIndex])]);
+		}
+		
+		//add the stats we are tracking after the identity fields
+		for (int curFieldIndex = 0; curFieldIndex < fields.length; curFieldIndex++) {
+			newStats[curFieldIndex + identityFields.length] = Double.parseDouble(entToAdd[mappings.get(fields[curFieldIndex])]);
 		}
 		
 		if (addPolicy.equals(StreakAddPolicy.LENGTH)) {
@@ -103,7 +114,7 @@ public class StreakStats {
 			if (this.numRows == stats.length) {
 				
 				//do the shift
-				for (int curRowIndex = 1; curRowIndex < this.numRows; curRowIndex++) {
+				for (int curRowIndex = 1; curRowIndex < stats.length; curRowIndex++) {
 					this.stats[curRowIndex-1] = this.stats[curRowIndex];
 				}
 				
@@ -141,10 +152,6 @@ public class StreakStats {
 		
 		return ret;
 		
-	}
-	
-	public Double summarize (String fieldName, Map <String, Integer> mappings) {
-		return mappings.containsKey(fieldName) ? -1.0 : summarize(mappings.get(fieldName));
 	}
 	
 }

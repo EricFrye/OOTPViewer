@@ -23,8 +23,8 @@ public class StreakType_Length extends StreakType {
 	}
 
 	@Override
-	public void addToStats(String[] fieldsOver, Map<String, Integer> mappings, String[] entity) {
-		this.curStreak.addStats(entity, fieldsOver, mappings, StreakAddPolicy.LENGTH);
+	public void addToStats(String[] fieldsOver, Map<String, Integer> mappings, String[] entity, String[] identityFields) {
+		this.curStreak.addStats(entity, fieldsOver, mappings, StreakAddPolicy.LENGTH, identityFields);
 	}
 
 	public void streakEnded(Map <String, Integer> mappings) {
@@ -33,12 +33,17 @@ public class StreakType_Length extends StreakType {
 			this.streak = this.curStreak;
 		}
 
-		this.curStreak = new StreakStats (this.curStreak);
+		this.curStreak = new StreakStats (this.curStreak, false);
 		
 	}
 	
 	public int getStreakLength () {
 		return super.streakLength();
+	}
+
+
+	public void postHandleEntity(Map <String, Integer> mappings) {
+		
 	}
 	
 }

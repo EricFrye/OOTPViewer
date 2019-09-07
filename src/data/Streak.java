@@ -11,12 +11,14 @@ public class Streak {
 	private StreakType type;
 	private boolean done;
 	private Map <String, Integer> mappings;
+	private String [] identityFields;
 	
-	public Streak (Map <String, Integer> mappings, String [] fieldsOver, String type, Object ...otherParams) {
+	public Streak (Map <String, Integer> mappings, String [] fieldsOver, String [] identityFields, String type, Object ...otherParams) {
 		
 		this.done = false;
 		this.fieldsOver = fieldsOver;
 		this.mappings = mappings;
+		this.identityFields = identityFields;
 		
 		if (type.equals("Amount")) {
 			
@@ -24,7 +26,18 @@ public class Streak {
 				throw new IllegalArgumentException();
 			}
 			
-			this.type = new StreakType_Amount(fieldsOver.length, (String)otherParams[0], (Integer)otherParams[1]);
+			int colIndex = -1;
+			
+			for (int curFieldOverIndex = 0; curFieldOverIndex < fieldsOver.length; curFieldOverIndex++) {
+				
+				if (fieldsOver[curFieldOverIndex].equals((String)otherParams[0])) {
+					colIndex = curFieldOverIndex;
+					curFieldOverIndex = fieldsOver.length;
+				}
+				
+			}
+			
+			this.type = new StreakType_Amount(fieldsOver.length + identityFields.length, (String)otherParams[0], colIndex + identityFields.length, (Integer)otherParams[1]);
 			
 		}
 		
@@ -45,18 +58,16 @@ public class Streak {
 	 */
 	public void handleEntity (String [] ent) {
 		
-		System.out.println("Streak is at: " + type.curStreak.length());
-		
 		//check for the continuation of the streak
 		if (this.type.isContinued(mappings, ent)) {
-			System.out.println("Streak continued!");
-			this.type.addToStats(this.fieldsOver, this.mappings, ent);
+			this.type.addToStats(this.fieldsOver, this.mappings, ent, this.identityFields);
 		}
 		
 		else {
-			System.out.println("Streak ended...");
 			this.type.streakEnded(mappings);
 		}
+		
+		this.type.postHandleEntity(mappings);
 		
 	}
 	

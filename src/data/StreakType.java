@@ -11,14 +11,16 @@ public abstract class StreakType {
 	
 	public StreakType (int numFields, Integer length) {
 		
-		this.streak = new StreakStats (numFields+1, length);
-		this.curStreak = new StreakStats (numFields+1, length);
+		//plus is for an identity column/columns
+		this.streak = new StreakStats (numFields, length);
+		this.curStreak = new StreakStats (numFields, length);
 		
 	}
 	
 	public abstract boolean isContinued (Map <String, Integer> mappings, String [] entity);
-	public abstract void addToStats (String [] fieldsOver, Map <String, Integer> mappings, String [] entity);
+	public abstract void addToStats (String [] fieldsOver, Map <String, Integer> mappings, String [] entity, String[] identityFields);
 	public abstract void streakEnded (Map <String, Integer> mappings);
+	public abstract void postHandleEntity (Map <String, Integer> mappings);
 	
 	public int streakLength () {
 		return this.streak.length();
