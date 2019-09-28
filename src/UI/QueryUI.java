@@ -54,10 +54,13 @@ public class QueryUI {
 				
 				if (ops == null) {
 					
+					//tell the user that 
 					JOptionPane.showMessageDialog(null, parser.getError().getMessage());
 					
+					//get the last typed word from the input based on the last char read successfully
 					int [] underlineIndicies = Utilities.backwardsSpaceIndex(searchText, parser.getCharsRead()-1);
 					
+					//apply the underlining
 					String newSearchTextBegin = searchText.substring(0, underlineIndicies[0]);
 					String underline = searchText.substring(underlineIndicies[0], underlineIndicies[1]); 
 					String newSearchTextEnd = underlineIndicies[1] == searchText.length() ? "" : searchText.substring(underlineIndicies[1]);
@@ -77,7 +80,7 @@ public class QueryUI {
 						parent.removeComp(curDisplayedTableName);
 					}
 					
-					HolderTable holderTab = HolderTable.generateHolderTable(curTable, "");
+					DataTable holderTab = DataTable.generateHolderTable(curTable, "");
 					curDisplayedTableName = name;
 					parent.addHolderTable(name, holderTab, new Dimension(400,300));
 					
@@ -121,6 +124,15 @@ public class QueryUI {
 		
 		this.search.addKeyListener(action);
 		parent.addComp("queryInput", this.search);
+		
+	}
+	
+	public static void main (String [] args) {
+		
+		Dimension dim = new Dimension (500,800);
+		MainFrame view = new MainFrame (dim);
+		
+		new QueryUI(view, 500, 800);
 		
 	}
 

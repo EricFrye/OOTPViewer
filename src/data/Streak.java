@@ -1,17 +1,17 @@
 package data;
 
-import java.util.Date;
 import java.util.Map;
+
+import UI.DataTable;
+import misc.Utilities;
 
 public class Streak {
 
-	private int startGameID;
-	private int endGameID;
 	private String [] fieldsOver; //the name of the fields to capture over this streak
-	private StreakType type;
+	private StreakType type; //governs the streak continued and stat adding policy
 	private boolean done;
-	private Map <String, Integer> mappings;
-	private String [] identityFields;
+	private Map <String, Integer> mappings; //mappings from the holder that the streak runs over
+	private String [] identityFields; //fields used to uniquely identify a streak entity.  should be included with stats
 	
 	public Streak (Map <String, Integer> mappings, String [] fieldsOver, String [] identityFields, String type, Object ...otherParams) {
 		
@@ -82,6 +82,23 @@ public class Streak {
 	 */
 	public Double [][] getStreakStats () {
 		return this.done ? type.streak.getStreakStats() : null;
+	}
+	
+	/**
+	 * 
+	 * @return The results of the streak ready to be displayed
+	 */
+	public DataTable getStreakResultsUI () {
+		
+		String [] headers = new String [fieldsOver.length + identityFields.length];
+		
+		Utilities.copyArrayContent(headers, identityFields, 0);
+		Utilities.copyArrayContent(headers, fieldsOver, identityFields.length);
+		
+		Object [][] data = this.type.streak.getStreakStats();
+		
+		return new DataTable(data, headers);
+		
 	}
 	
 }

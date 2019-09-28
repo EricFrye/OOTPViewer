@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -15,18 +16,20 @@ public class MainFrame extends JFrame {
 	private JPanel container;
 	private Map <String, Component> items;
 	
-	public MainFrame (int width, int height) {
+	public MainFrame (Dimension dim) {
 		
 		super();
 		this.container = new JPanel ();
 		this.container.setVisible(true);
 		this.getContentPane().add(container);
 		
-		this.setSize(new Dimension (width, height));
+		//this.setSize(dim);
 		this.setVisible(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
 		this.items = new HashMap <String, Component> ();
+		
+		container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));
 		
 	}
 	
@@ -35,7 +38,7 @@ public class MainFrame extends JFrame {
 	 * @param table
 	 * @param size
 	 */
-	public void addHolderTable (String name, HolderTable table, Dimension size) {
+	public void addHolderTable (String name, DataTable table, Dimension size) {
 		
 		JScrollPane toAdd = new JScrollPane (table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		toAdd.setVisible(true);
@@ -55,6 +58,7 @@ public class MainFrame extends JFrame {
 		
 		repaint();
 		revalidate();
+		pack();
 		
 		return add;
 		

@@ -9,10 +9,11 @@ import data.*;
  * @author Eric
  *
  */
-public class HolderTable extends JTable {
+public class DataTable extends JTable {
 	
-	private HolderTable (Object [][] data, String [] colNames) {
+	public DataTable (Object [][] data, String [] colNames) {
 		super(data, colNames);
+		setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 	}
 	
 	/**
@@ -21,7 +22,7 @@ public class HolderTable extends JTable {
 	 * @param fieldsSummarize str Of the form BEGIN_REGEX([\w+][\\*])([,\w+][\\*])*END_REGEX where a * literal means this field should be interpreted as a double.  The fields under which to be summarized and added at the end. 
 	 * @return A HolderTable object containing the corresponding entries and a summary row at the end
 	 */
-	public static HolderTable generateHolderTable (Holder table, String fieldsSummarize) {
+	public static DataTable generateHolderTable (Holder table, String fieldsSummarize) {
 		
 		String [] colNames = table.mappings();
 		int numEntries = table.numEntities(); 
@@ -35,7 +36,7 @@ public class HolderTable extends JTable {
 		
 		//data[numEntries] = table.summarize(fieldsSummarize);
 		
-		HolderTable ret = new HolderTable (data, colNames);
+		DataTable ret = new DataTable (data, colNames);
 		ret.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		
 		/*

@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 import data.Type;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Utilities {
 	
@@ -206,26 +208,7 @@ public class Utilities {
 		return ret;
 		
 	}
-	
-	public static void main (String [] args) {
-		
-		String [] arr = new String [2];
-				
-		arr = insert(arr, "player_id");
-		arr = insert(arr, "team_id");
-		arr = insert(arr, "team_id");
-		arr = insert(arr, "league_id");
-		arr = insert(arr, "team_id");
-		arr = insert(arr, "t");
-		arr = insert(arr, "t");
-		
-		arr = shrinkArray(arr);
-		
-		for (int i = 0; i < arr.length; i++) {
-			System.out.println(arr[i]);
-		}
-		
-	}
+
 	
 	/**
 	 * Append s to the end of arr
@@ -341,6 +324,57 @@ public class Utilities {
 		String joiner = "\\";
 		
 		return String.join(joiner, strings);
+		
+	}
+	
+	/**
+	 * Copy all the contents from one array to the other
+	 * @param to
+	 * @param from
+	 * @param toIndex The index to begin copying from in the from array
+	 */
+	public static void copyArrayContent (Object [] to, Object [] from, int toIndex) {
+		
+		//print an error message with morehelpful info than index out of bounds
+		if (toIndex + from.length > to.length) {
+			throw new IllegalArgumentException(String.format("Cannot insert %d elements from %s to %s starting at index %d", from.length, from.toString(), to.toString(), toIndex));
+		}
+		
+		for (int curFromIndex = 0; curFromIndex < from.length; curFromIndex++) {
+			to[toIndex+curFromIndex] = from[curFromIndex];
+		}
+		
+	}
+	
+	public static void writeStringToFile (String path, String data) {
+		
+		String fileName = System.nanoTime() + ".csv";
+		
+		Path newFile = Paths.get(path, fileName);
+		
+		try {
+			FileWriter output = new FileWriter(newFile.toFile());
+			output.append(data);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public static void main (String [] args) {
+		
+		String [] test = new String [10];
+		
+		String [] test1 = new String [] {"a","b","c","d"};
+		String [] test2 = new String [] {"a","b","c","d","e","f"};
+		
+		Utilities.copyArrayContent(test, test1, 0);
+		Utilities.copyArrayContent(test, test2, test1.length);
+		
+		for (String cur: test) {
+			System.out.println(cur);
+		}
 		
 	}
 	

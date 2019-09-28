@@ -23,7 +23,7 @@ public class Operations {
 			Holder newHolder = new Holder ("data", name);
 			
 			try {
-				newHolder.loadInfo(null);
+				newHolder.loadInfo(null, null);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;

@@ -69,7 +69,7 @@ public class QueryResult extends Holder{
 		Holder table = new QueryResult (path, file);
 		
 		try {
-			table.loadInfo(loadCondition);
+			table.loadInfo(null, loadCondition);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

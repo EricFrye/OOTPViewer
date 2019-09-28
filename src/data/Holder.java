@@ -1,7 +1,7 @@
 package data;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -11,8 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import boolean_logic.Quantifier;
 import misc.Utilities;
-import query.Operations;
-import query.QueryParser;
 import query.QueryResult;
 
 /***
@@ -25,8 +23,8 @@ public class Holder {
 	protected Map <String, Integer> mappings; //maps the col names to their index. the index in the list is the index in the report
 	protected Data data; //holds the actual data
 	protected Type [] types; //stores the type for each field
-	private String directoryPath;
 	private String fileName;
+	private String directoryPath; 
 	
 	/***
 	 * Creates the InfoHolder object
@@ -36,8 +34,8 @@ public class Holder {
 	public Holder (String directoryPath, String fileName) {
 		
 		this.mappings = new HashMap <String, Integer> ();
-		this.directoryPath = directoryPath;
 		this.fileName = fileName;
+		this.directoryPath = directoryPath;
 		this.types = Utilities.loadTypes("settings\\fileData", fileName + ".csv");
 		
 	}
@@ -51,7 +49,6 @@ public class Holder {
 	 * @param types types for the entities
 	 */
 	protected Holder (Map <String, Integer> mappings, Data data, Type [] types) {
-		this.directoryPath = "";
 		this.fileName = "";
 		this.mappings = mappings;
 		this.types = types;
@@ -62,10 +59,11 @@ public class Holder {
 	 * Standard loading function.  All columns are kept
 	 * @param condition The string representation of a query to check against the loaded values. A value of null means there is no condition to check against
 	 */
-	public void loadInfo (String condition) throws Exception {
+	public void loadInfo (List <File> files, String condition) throws Exception {
 		
-		List <File> files = FileLooker.findFiles(this.fileName, new File(this.directoryPath));
-		Thread [] workers = new Thread [files.size()];
+		if (files == null) {
+			files = FileLooker.findFiles(this.fileName, new File(this.directoryPath));
+		}
 		
 		Quantifier queries = new Quantifier();
 		
@@ -73,36 +71,62 @@ public class Holder {
 			queries.parseQuantifier(condition);
 		}
 		
+		loadFiles(files, queries);
+
+	}
+	
+	/**
+	 * Load the headers of the csv files into the mappings
+	 * @param curInput curInput must have the first line of the file be headers
+	 */
+	private void loadHeaders (Scanner curInput) {
+		
+		String header = curInput.nextLine();
+		String [] headers = header.split(",");
+
+		//fill out the mappings structure
+		for (int j = 0; j < headers.length; j++) {
+			this.mappings.put(headers[j], j);
+		}
+		
+		this.data = new Data (headers.length);
+		
+	}
+	
+	private void loadFiles (List <File> files,  Quantifier condition) {
+
 		ExecutorService pool = Executors.newFixedThreadPool(8);
 		
 		for (int i = 0; i < files.size(); i++) {
 			
 			File curFile = files.get(i);
-			Scanner curInput = new Scanner (curFile);
+			
+			Scanner curInput;
+			
+			try {
+				curInput = new Scanner (curFile);
+			} catch (FileNotFoundException e) {
+				System.out.println("File not found");
+				return;
+			}
 			
 			//the first file has header info, we need this before anything can start
 			if (i == 0) {
-				
-				String header = curInput.nextLine();
-				String [] headers = header.split(",");
-
-				//fill out the mappings structure
-				for (int j = 0; j < headers.length; j++) {
-					this.mappings.put(headers[j], j);
-				}
-				
-				this.data = new Data (headers.length);
-				
+				loadHeaders(curInput);
 			}
 			
-			Runnable curWorker = new FileLoader (curFile, curInput, this.data, this.mappings, queries);
+			Runnable curWorker = new FileLoader (curFile, curInput, this.data, this.mappings, condition);
 			pool.execute(curWorker);
 			
 		}
 		
 		pool.shutdown();
-		pool.awaitTermination(1000, TimeUnit.SECONDS);
-
+		try {
+			pool.awaitTermination(1000, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	/**
@@ -131,48 +155,12 @@ public class Holder {
 		
 	}
 	
-	//TODO
-	public String buildReport () {
-		
-		String ret = "";
-	
-		
-		return ret;
-		
-	}
-	
 	/**
 	 * @return The count of entries in this Holder
 	 */
 	public int numEntities () {
 		return data.numRows();
 	}
-	
-	/**
-	 * @param directoryPath String representation of the path to the directory the target files are currently in.  No trailing /
-	 * @param mainFileName Name of file to search for splits of.  The splits will be of the form mainFileName_\d+
-	 * @return An List of all the files matching the parameters
-	 */
-	private List <File> findAllFiles () {
-		
-		File searchDir = new File (this.directoryPath);
-		File [] allFilesInDir = searchDir.listFiles();
-		
-		String pattern = String.format("^%s(_\\d+){0,1}.csv$", this.fileName);
-		List <File> matchedFiles = new LinkedList <File> ();
-		
-		for (File curFile: allFilesInDir) {
-			
-			if (curFile.getName().matches(pattern)) {
-				matchedFiles.add(curFile);
-			}
-			
-		}
-		
-		return matchedFiles;
-		
-	}
-	
 	
 	public String asCSV () {
 		
@@ -314,6 +302,10 @@ public class Holder {
 	 */
 	public int numFields () {
 		return this.mappings.size();
+	}
+	
+	public Map <String, Integer> getMappings () {
+		return this.mappings;
 	}
 	
 	/**
@@ -468,7 +460,7 @@ public class Holder {
 		return strk;
 		
 	}
-	
+
 	public static void main (String [] args) {
 		
 		String path = "D:\\Java_Projects\\OOTPViewer\\data";
@@ -477,7 +469,7 @@ public class Holder {
 		Holder game_logs = new Holder (path, command);
 		
 		try {
-			game_logs.loadInfo("player_id = 14");
+			game_logs.loadInfo(null, "player_id = 14");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
