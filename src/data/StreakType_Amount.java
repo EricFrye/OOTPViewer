@@ -43,8 +43,6 @@ public class StreakType_Amount extends StreakType {
 		
 		Double curAmount = this.curStreak.summarize(this.colMaximize);
 		
-		System.out.println("Current:" + curAmount);
-		
 		//update the best seen streak
 		if (this.bestAmount < curAmount) {
 			this.streak = this.curStreak;

@@ -13,6 +13,13 @@ public class Streak {
 	private Map <String, Integer> mappings; //mappings from the holder that the streak runs over
 	private String [] identityFields; //fields used to uniquely identify a streak entity.  should be included with stats
 	
+	/**
+	 * @param mappings Mappings from the Holder that the streak will run over
+	 * @param fieldsOver Fields to track
+	 * @param identityFields Identifier fields for records in holder
+	 * @param type
+	 * @param otherParams type.Equals(LENGTH) then String (condition for streak) value type.Equals(AMOUNT) then String (field to maximize) followed by Integer (number of games to do this over)
+	 */
 	public Streak (Map <String, Integer> mappings, String [] fieldsOver, String [] identityFields, String type, Object ...otherParams) {
 		
 		this.done = false;
@@ -28,6 +35,7 @@ public class Streak {
 			
 			int colIndex = -1;
 			
+			//find the index of the value that we are maximizing
 			for (int curFieldOverIndex = 0; curFieldOverIndex < fieldsOver.length; curFieldOverIndex++) {
 				
 				if (fieldsOver[curFieldOverIndex].equals((String)otherParams[0])) {
@@ -98,6 +106,21 @@ public class Streak {
 		Object [][] data = this.type.streak.getStreakStats();
 		
 		return new DataTable(data, headers);
+		
+	}
+	
+	public void processStreak (Holder data) {
+		
+		data.sort(new String []{"year","game_id"}, true);
+		
+		for (int curEntIndex = 0; curEntIndex < data.numEntities(); curEntIndex++) {
+			
+			String [] curEnt = data.getEntity(curEntIndex);
+			handleEntity(curEnt);
+			
+		}
+		
+		end();
 		
 	}
 	

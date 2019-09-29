@@ -21,11 +21,21 @@ import data_obj.Team;
 
 public class StreakUI extends JPanel implements ActionListener{
 	
+	private static final String LENGTH = "Length";
+	private static final String AMOUNT = "Amount";
+	private static final String NONE = "";
+	
 	private JFrame parent;
 	
 	private JPanel streakTypeContainer;
-	private JTextField streakInput;
 	private JComboBox <String> streakType;
+	
+	private JPanel streakLengthContainer;
+	private JTextField streakLengthCondition;
+	
+	private JPanel streakSpanContainer;
+	private JComboBox <String> streakSpanField;
+	private JTextField streakSpanLength;
 	
 	private JPanel streakSelectablesContainer;
 	private JComboBox <Team> teams;
@@ -34,6 +44,7 @@ public class StreakUI extends JPanel implements ActionListener{
 	private JPanel streakSubmitContainer;
 	private JButton submit;
 	
+	private JScrollPane streakOutputTable;
 	private JPanel streakOutputContainer;
 	
 	public StreakUI (JFrame parent, Dimension size) {
@@ -57,16 +68,32 @@ public class StreakUI extends JPanel implements ActionListener{
 		add(streakSelectablesContainer);
 		add(streakSubmitContainer);
 		
-		//initialize type and condition
-		streakInput = new JTextField(20);
-		streakInput.setVisible(true);
-		streakType = new JComboBox<String>(new String [] {"Length","Amount"});
+		//inititalize the sub panel for span
+		streakSpanContainer = new JPanel ();
+		streakSpanField = new JComboBox<String>(FileLooker.loadFieldNames(String.format("players_game_%s", "batting"), "data", 2));
+		streakSpanField.setVisible(true);
+		streakSpanLength = new JTextField (4);
+		streakSpanLength.setVisible(true);
+		streakSpanContainer.add(streakSpanField);
+		streakSpanContainer.add(streakSpanLength);
+		streakSpanContainer.setVisible(false);
+		
+		//initialize the sub panel for length
+		streakLengthContainer = new JPanel ();
+		streakLengthCondition = new JTextField (20);
+		streakLengthCondition.setVisible(true);
+		streakLengthContainer.add(streakLengthCondition);
+		streakLengthContainer.setVisible(false);
+		
+		streakType = new JComboBox<String>(new String [] {NONE,LENGTH,AMOUNT});
 		streakType.setVisible(true);
+		streakType.addActionListener(this);
 		
 		//add to type container
-		streakTypeContainer.add(streakInput);
 		streakTypeContainer.add(streakType);
-
+		streakTypeContainer.add(streakSpanContainer);
+		streakTypeContainer.add(streakLengthContainer);
+		
 		//add teams
 		teams = new JComboBox <Team> ();
 		teams.setVisible(true);
@@ -83,7 +110,6 @@ public class StreakUI extends JPanel implements ActionListener{
 		this.parent.pack();
 		
 	}
-	
 
 	public void loadTeams (String condition) {
 		
@@ -162,11 +188,13 @@ public class StreakUI extends JPanel implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
+		//load the players for the team
 		if (teams == e.getSource()) {
 			Team selectedTeam = (Team)this.teams.getSelectedItem();
 			loadPlayers(String.format("team_id=%s", selectedTeam.getID()));
 		}
 		
+		//show the submit button
 		else if (players == e.getSource()) {
 			submit.setVisible(true);
 			streakSubmitContainer.add(this.submit);
@@ -175,23 +203,62 @@ public class StreakUI extends JPanel implements ActionListener{
 			parent.pack();
 		}
 		
+		//when submit is pressed we want to process the query
 		else if (submit == e.getSource()) {
+			
+			//delete an old table
+			if (streakOutputTable != null) {
+				streakSubmitContainer.remove(streakOutputTable);
+			}
 			
 			String type = this.streakType.getSelectedItem().toString();
 			
-			if (type.equals("Length")) {
-				
+			if (!type.equals("")) {
+			
+				DataTable result = null;
 				String playerID = ((Player)this.players.getSelectedItem()).getID() + "";
-				DataTable result = Reports.playerHittingStreak(playerID, type, streakInput.getText());
 				
-				JScrollPane toAdd = new JScrollPane (result, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-				toAdd.setVisible(true);
-				streakSubmitContainer.add(toAdd);
-				repaint();
-				revalidate();
-				parent.pack();
+				if (type.equals(LENGTH)) {
+					result = Reports.playerHittingStreak(playerID, type, streakLengthCondition.getText());
+				}
+				
+				else if (type.equals(AMOUNT)) {
+					result = Reports.playerHittingStreak(playerID, type, streakSpanField.getSelectedItem().toString(), Integer.parseInt(streakSpanLength.getText()));
+				}
+
+				//add output table
+				if (result != null) {
+					streakOutputTable = new JScrollPane (result, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+					streakOutputTable.setVisible(true);
+					streakSubmitContainer.add(streakOutputTable);
+					repaint();
+					revalidate();
+					parent.pack();
+				}
 				
 			}
+			
+		}
+		
+		//show or hide the span field
+		else if (streakType == e.getSource()) {
+			
+			streakSpanContainer.setVisible(false);
+			streakLengthContainer.setVisible(false);
+			
+			String streakTypeValue = streakType.getSelectedItem().toString();
+			
+			if (streakTypeValue.equals(AMOUNT)) {
+				streakSpanContainer.setVisible(true);
+			}
+			
+			else if (streakTypeValue.equals(LENGTH)) {
+				streakLengthContainer.setVisible(true);
+			}
+			
+			repaint();
+			revalidate();
+			parent.pack();
 			
 		}
 		

@@ -218,6 +218,10 @@ public class Holder {
 		return data.numRows() == 0  || index >= data.numRows() ? null : data.getEntity(index);
 	}
 	
+	public String [] getEntity (int index) {
+		return data.numRows() == 0  || index >= data.numRows() ? null : data.getEntity(index);
+	}
+	
 	/**
 	 * Sums the columns of this holder corresponding to the string passed in
 	 * @param str Of the form BEGIN_REGEX([\w+])([,\w+])*END_REGEX
@@ -442,22 +446,6 @@ public class Holder {
 			return valsToRet;
 			
 		}
-		
-	}
-	
-	public Streak processStreak (Streak strk) {
-		
-		this.sort(new String []{"year","game_id"}, true);
-		
-		for (int curEntIndex = 0; curEntIndex < this.data.numRows(); curEntIndex++) {
-			
-			String [] curEnt = this.data.getEntity(curEntIndex);
-			strk.handleEntity(curEnt);
-			
-		}
-		
-		strk.end();
-		return strk;
 		
 	}
 
