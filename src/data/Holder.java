@@ -59,7 +59,7 @@ public class Holder {
 	 * Standard loading function.  All columns are kept
 	 * @param condition The string representation of a query to check against the loaded values. A value of null means there is no condition to check against
 	 */
-	public void loadInfo (List <File> files, String condition) throws Exception {
+	public void loadInfo (List <File> files, String condition) {
 		
 		if (files == null) {
 			files = FileLooker.findFiles(this.fileName, new File(this.directoryPath));
@@ -220,6 +220,23 @@ public class Holder {
 	
 	public String [] getEntity (int index) {
 		return data.numRows() == 0  || index >= data.numRows() ? null : data.getEntity(index);
+	}
+	
+	/**
+	 * 
+	 * @param index
+	 * @param field
+	 * @return null if index or field is an invalid value, otherwise the value for field for the entity at index
+	 */
+	public String getEntityVal (int index, String field) {
+		
+		if (!mappings.containsKey(field)) {
+			return null;
+		}
+		
+		String [] ent = getEntity(index);
+		return ent == null ? null : ent[mappings.get(field)];
+		
 	}
 	
 	/**

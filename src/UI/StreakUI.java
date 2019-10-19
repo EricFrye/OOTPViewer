@@ -3,6 +3,7 @@ package UI;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -15,6 +16,7 @@ import javax.swing.JTextField;
 import data.FileLooker;
 import data.Holder;
 import data.Reports;
+import data.Streak;
 import data.StreakType;
 import data_obj.Player;
 import data_obj.Team;
@@ -46,6 +48,8 @@ public class StreakUI extends JPanel implements ActionListener{
 	
 	private JScrollPane streakOutputTable;
 	private JPanel streakOutputContainer;
+	
+	private Map <Integer, Streak> loadedStreaks;
 	
 	public StreakUI (JFrame parent, Dimension size) {
 		
@@ -172,26 +176,31 @@ public class StreakUI extends JPanel implements ActionListener{
 		this.parent.pack();
 		
 	}
-	
-	public static void main (String [] args) {
-		
-		Dimension dim = new Dimension (500, 300);
-		MainFrame view = new MainFrame (dim);
-		
-		StreakUI ui = new StreakUI(view, dim);
-		view.addComp("StreakUI",ui);
-		ui.loadTeams("league_id = 100");
-		
-	}
 
-
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		
 		//load the players for the team
 		if (teams == e.getSource()) {
+			
 			Team selectedTeam = (Team)this.teams.getSelectedItem();
-			loadPlayers(String.format("team_id=%s", selectedTeam.getID()));
+			
+			String type = this.streakType.getSelectedItem().toString();
+			
+			if (type.equals(LENGTH)) {
+				this.loadedStreaks = Reports.playerStreakByTeam("2029", selectedTeam.getID()+"", Reports.playersHittingStreakFields, new String [] {"game_id"}, type, streakLengthCondition.getText());
+			}
+			
+			else if (type.equals(AMOUNT)) {
+				this.loadedStreaks = Reports.playerStreakByTeam("2029", selectedTeam.getID()+"", Reports.playersHittingStreakFields, new String [] {"game_id"}, type, streakSpanField.getSelectedItem().toString(), Integer.parseInt(streakSpanLength.getText()));
+			}
+						
+			//delete an old table
+			if (streakOutputTable != null) {
+				streakSubmitContainer.remove(streakOutputTable);
+			}
+			
+			loadPlayers("team_id="+selectedTeam.getID());
+		
 		}
 		
 		//show the submit button
@@ -211,20 +220,14 @@ public class StreakUI extends JPanel implements ActionListener{
 				streakSubmitContainer.remove(streakOutputTable);
 			}
 			
-			String type = this.streakType.getSelectedItem().toString();
-			
-			if (!type.equals("")) {
+
 			
 				DataTable result = null;
 				String playerID = ((Player)this.players.getSelectedItem()).getID() + "";
 				
-				if (type.equals(LENGTH)) {
-					result = Reports.playerHittingStreak(playerID, type, streakLengthCondition.getText());
-				}
+				System.out.println(playerID);
 				
-				else if (type.equals(AMOUNT)) {
-					result = Reports.playerHittingStreak(playerID, type, streakSpanField.getSelectedItem().toString(), Integer.parseInt(streakSpanLength.getText()));
-				}
+				result = this.loadedStreaks.get(Integer.parseInt(playerID)).getStreakResultsUI();
 
 				//add output table
 				if (result != null) {
@@ -238,7 +241,7 @@ public class StreakUI extends JPanel implements ActionListener{
 				
 			}
 			
-		}
+		
 		
 		//show or hide the span field
 		else if (streakType == e.getSource()) {
@@ -262,7 +265,18 @@ public class StreakUI extends JPanel implements ActionListener{
 			
 		}
 		
+	}
+
+	public static void main (String [] args) {
+		
+		Dimension dim = new Dimension (500, 300);
+		MainFrame view = new MainFrame (dim);
+		
+		StreakUI ui = new StreakUI(view, dim);
+		view.addComp("StreakUI",ui);
+		ui.loadTeams("league_id = 100");
 		
 	}
+
 	
 }
